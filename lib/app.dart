@@ -10,7 +10,7 @@ class ValidasiIdeApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'ValidasiIde - Validasi Ide Bisnis UMKM',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       routerConfig: AppRouter.router,
     );
   }

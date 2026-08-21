@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/photo_model.dart';
@@ -16,48 +17,43 @@ class PhotoRepository {
     );
   }
 
-  /// Upload photo and process it
-  Future<ProductPhoto> uploadAndProcess(XFile image) async {
-    final userId = _client.auth.currentUser!.id;
-    final fileName =
-        '$userId/${DateTime.now().millisecondsSinceEpoch}_${image.name}';
-
-    // Upload to Supabase Storage
+  /// Flow A: Enhance background of an existing photo
+  Future<String> enhancePhoto(XFile image, String style) async {
     final bytes = await image.readAsBytes();
-    await _client.storage.from('product-photos').uploadBinary(
-          fileName,
-          bytes,
-          fileOptions: FileOptions(contentType: image.mimeType ?? 'image/jpeg'),
-        );
-
-    // Create DB record
-    final record = await _client.from('product_photos').insert({
-      'user_id': userId,
-      'original_path': fileName,
-      'status': 'processing',
-    }).select().single();
-
-    // Call process-photo Edge Function
+    final base64Image = base64Encode(bytes);
+    
     final response = await _client.functions.invoke(
-      'process-photo',
+      'ai-product-photo',
       body: {
-        'photo_id': record['id'],
-        'storage_path': fileName,
+        'flow': 'A',
+        'image_base64': base64Image,
+        'style': style,
       },
     );
 
     if (response.status != 200) {
       throw Exception('Gagal memproses foto: ${response.data}');
     }
+    
+    return response.data['image_url'] as String;
+  }
 
-    // Fetch updated record
-    final updated = await _client
-        .from('product_photos')
-        .select()
-        .eq('id', record['id'])
-        .single();
+  /// Flow B: Generate photo from text prompt
+  Future<String> generatePhoto(String prompt, String style) async {
+    final response = await _client.functions.invoke(
+      'ai-product-photo',
+      body: {
+        'flow': 'B',
+        'prompt': prompt,
+        'style': style,
+      },
+    );
 
-    return ProductPhoto.fromJson(updated);
+    if (response.status != 200) {
+      throw Exception('Gagal membuat foto: ${response.data}');
+    }
+    
+    return response.data['image_url'] as String;
   }
 
   /// Get all photos for current user

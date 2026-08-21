@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../config/app_colors.dart';
 
 /// Primary CTA button with gradient background and glow shadow.
-/// Text is dark-on-gold for the warm primary, white for accent gradients.
+/// On light theme: white text on gold; white text on accent/danger.
 class GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -21,14 +21,8 @@ class GradientButton extends StatelessWidget {
     this.width,
   });
 
-  /// Decide text/icon color based on gradient brightness.
-  /// Primary (gold) uses dark text; accent/danger/secondary use white.
-  Color get _foregroundColor {
-    if (gradient == null || gradient == AppColors.primaryGradient) {
-      return const Color(0xFF1B2838);
-    }
-    return Colors.white;
-  }
+  /// White text on all gradient buttons for light theme
+  Color get _foregroundColor => Colors.white;
 
   @override
   Widget build(BuildContext context) {

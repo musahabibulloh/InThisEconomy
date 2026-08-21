@@ -85,7 +85,7 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
               ],
             ),
             child: const Icon(Icons.auto_awesome_rounded,
-                color: Color(0xFF1B2838), size: 36),
+                color: Colors.white, size: 36),
           )
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scale(
@@ -176,7 +176,7 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.lightbulb_rounded,
-                      color: Color(0xFF1B2838), size: 20),
+                      color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -460,7 +460,7 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
   void _showAllCompetitors(List<Map<String, dynamic>> competitors) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgDarkSecondary,
+      backgroundColor: AppColors.surfaceLightElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

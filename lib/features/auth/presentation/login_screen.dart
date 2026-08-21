@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/glass_card.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../data/auth_repository.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,13 +20,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authRepo = AuthRepository();
+  final _passwordFocus = FocusNode();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _isPasswordFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordFocus.addListener(() {
+      setState(() {
+        _isPasswordFocused = _passwordFocus.hasFocus;
+      });
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -63,87 +78,76 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 60),
 
-              // Logo / Brand — lantern-gold icon
+              const SizedBox(height: 40),
+
+              // Title
               Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.4),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.lightbulb_outline_rounded,
-                    color: Color(0xFF1B2838),
-                    size: 40,
+                child: Text(
+                  'In This Economy.',
+                  textAlign: TextAlign.center,
+                  style: AppTheme.displayFont(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
                   ),
                 ),
-              )
-                  .animate()
-                  .fadeIn(duration: 600.ms)
-                  .scale(begin: const Offset(0.8, 0.8)),
+              ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0),
+              const SizedBox(height: 4),
+              Center(
+                child: Text(
+                  'Log in to your business :)',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                      ),
+                ),
+              ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
 
               const SizedBox(height: 32),
 
-              // Title — uses display font
+              // Bear Avatar
               Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'ValidasiIde',
-                      style: AppTheme.displayFont(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Validasi ide bisnismu sebelum keluar modal',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                  ],
+                child: Image.asset(
+                  'assets/icons/bear_login.webp',
+                  width: 160,
+                  height: 160,
+                  fit: BoxFit.contain,
                 ),
-              ).animate().fadeIn(delay: 200.ms, duration: 600.ms).slideY(
-                    begin: 0.2,
-                    end: 0,
-                  ),
+              ).animate().fadeIn(delay: 400.ms, duration: 600.ms),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
 
               // Form
               Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Email',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'contoh@email.com',
-                        prefixIcon: Icon(
-                          Icons.email_outlined,
+                        prefixIcon: const Icon(
+                          Icons.email_rounded,
                           color: AppColors.textMuted,
                         ),
+                        filled: true,
+                        fillColor: AppColors.glassWhite(0.5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: AppColors.glassBorder(0.6)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: AppColors.glassBorder(0.6)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -155,23 +159,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Password',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _passwordController,
+                      focusNode: _passwordFocus,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         hintText: '••••••••',
                         prefixIcon: const Icon(
-                          Icons.lock_outline_rounded,
+                          Icons.key_rounded,
                           color: AppColors.textMuted,
                         ),
                         suffixIcon: IconButton(
@@ -186,6 +182,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                 () => _obscurePassword = !_obscurePassword);
                           },
                         ),
+                        filled: true,
+                        fillColor: AppColors.glassWhite(0.5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: AppColors.glassBorder(0.6)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: AppColors.glassBorder(0.6)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -197,35 +208,71 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // Login button
-                    GradientButton(
-                      text: 'Masuk ke Akun',
-                      onPressed: _handleLogin,
-                      isLoading: _isLoading,
-                      icon: Icons.arrow_forward_rounded,
+                    Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'LOGIN DENGAN EMAIL',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
                     // Register link
                     Center(
                       child: TextButton(
                         onPressed: () => context.push('/register'),
                         child: RichText(
-                          text: TextSpan(
-                            text: 'Belum punya akun? ',
+                          text: const TextSpan(
+                            text: 'Belum gabung? ',
                             style: TextStyle(
                               color: AppColors.textSecondary,
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                             children: [
                               TextSpan(
-                                text: 'Daftar',
+                                text: 'Daftar Yuk',
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ],
@@ -235,10 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-              )
-                  .animate()
-                  .fadeIn(delay: 400.ms, duration: 600.ms)
-                  .slideY(begin: 0.3, end: 0),
+              ).animate().fadeIn(delay: 600.ms, duration: 600.ms).slideY(begin: 0.1, end: 0),
 
               const SizedBox(height: 40),
             ],

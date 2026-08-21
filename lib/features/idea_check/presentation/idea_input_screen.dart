@@ -367,7 +367,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
       SnackBar(
         content: const Text(
             'Fitur lokasi GPS akan tersedia setelah setup Google Maps API key'),
-        backgroundColor: AppColors.surfaceDarkElevated,
+        backgroundColor: AppColors.textPrimary,
       ),
     );
   }

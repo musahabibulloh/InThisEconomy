@@ -141,7 +141,7 @@ class _GapResultScreenState extends State<GapResultScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   'Tidak ditemukan celah pasar di area ini',
-                                  style: TextStyle(color: AppColors.textMuted),
+                                  style: TextStyle(color: AppColors.textPrimary),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(

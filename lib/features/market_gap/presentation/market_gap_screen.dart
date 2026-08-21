@@ -74,7 +74,7 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
         child: RefreshIndicator(
           onRefresh: _refresh,
           color: AppColors.secondary,
-          backgroundColor: AppColors.surfaceDark,
+          backgroundColor: AppColors.bgLightSecondary,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 24),

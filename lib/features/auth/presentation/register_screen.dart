@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/glass_card.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../data/auth_repository.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -83,24 +85,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              Text(
-                'Buat Akun',
-                style: AppTheme.displayFont(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+              Center(
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.glassWhite(0.6),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.glassBorder(0.8), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.glassShadow(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: SvgPicture.asset('assets/icons/ite_greet.svg'),
+                ),
+              ).animate().fadeIn(duration: 600.ms).scale(begin: const Offset(0.8, 0.8)),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  'Gabung ITE',
+                  style: AppTheme.displayFont(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
                 ),
               ).animate().fadeIn(duration: 600.ms),
               const SizedBox(height: 8),
-              Text(
-                'Mulai validasi ide bisnismu hari ini',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+              Center(
+                child: Text(
+                  'Mulai kelola usahamu dengan pintar hari ini.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
               ).animate().fadeIn(delay: 100.ms, duration: 600.ms),
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
 
-              Form(
+              GlassCard(
+                padding: const EdgeInsets.all(20),
+                child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,14 +243,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: RichText(
                           text: TextSpan(
                             text: 'Sudah punya akun? ',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 14,
                             ),
                             children: [
                               TextSpan(
-                                text: 'Masuk',
-                                style: TextStyle(
+                                text: 'Masuk Sini',
+                                style: const TextStyle(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -232,6 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ],
                 ),
+              )
               ).animate().fadeIn(delay: 200.ms, duration: 600.ms).slideY(
                     begin: 0.3,
                     end: 0,

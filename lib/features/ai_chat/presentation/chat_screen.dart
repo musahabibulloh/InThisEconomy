@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
@@ -103,6 +104,71 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _showHistory() async {
+    final sessions = await _repo.getSessions();
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.glassBorder(0.6),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Riwayat Obrolan',
+                style: AppTheme.displayFont(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: sessions.isEmpty
+                    ? const Center(child: Text('Belum ada riwayat chat.'))
+                    : ListView.builder(
+                        itemCount: sessions.length,
+                        itemBuilder: (context, index) {
+                          final session = sessions[index];
+                          return ListTile(
+                            leading: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary),
+                            title: Text(session.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            subtitle: Text(
+                              'Diperbarui: ${session.updatedAt.toLocal().toString().split('.')[0]}',
+                              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                            ),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              setState(() => _isLoading = true);
+                              _session = session;
+                              _messages = await _repo.getMessages(session.id);
+                              if (mounted) setState(() => _isLoading = false);
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,6 +178,11 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () => context.pop()),
         title: const Text('Konsultasi AI'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded),
+            onPressed: _showHistory,
+            tooltip: 'Riwayat Chat',
+          ),
           IconButton(
             icon: const Icon(Icons.add_comment_outlined),
             onPressed: () async {
@@ -161,10 +232,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     bottom: MediaQuery.of(context).padding.bottom + 8,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.bgDarkSecondary,
+                    color: AppColors.glassWhite(0.9),
                     border: Border(
                       top: BorderSide(
-                          color: AppColors.textMuted.withValues(alpha: 0.08)),
+                          color: AppColors.glassBorder()),
                     ),
                   ),
                   child: Row(
@@ -177,7 +248,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           decoration: InputDecoration(
                             hintText: 'Tanya soal ide bisnismu...',
                             filled: true,
-                            fillColor: AppColors.surfaceDark,
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide.none,
@@ -196,7 +267,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  AppColors.primary.withValues(alpha: 0.35),
+                                  AppColors.primary.withValues(alpha: 0.25),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -204,7 +275,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.send_rounded,
-                              color: Color(0xFF1B2838), size: 20),
+                              color: Colors.white, size: 20),
                           onPressed: _isSending ? null : _sendMessage,
                         ),
                       ),
@@ -218,71 +289,102 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessageBubble(ChatMessage msg) {
     final isUser = msg.role == 'user';
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.78),
-        decoration: BoxDecoration(
-          gradient: isUser ? AppColors.primaryGradient : null,
-          color: isUser ? null : AppColors.surfaceDark,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(isUser ? 18 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 18),
-          ),
-          border: isUser
-              ? null
-              : Border.all(
-                  color: AppColors.textMuted.withValues(alpha: 0.12)),
+    final bubble = Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.70), // Reduced max width to fit avatar
+      decoration: BoxDecoration(
+        gradient: isUser ? AppColors.primaryGradient : null,
+        color: isUser ? null : AppColors.glassWhite(0.85),
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(18),
+          topRight: const Radius.circular(18),
+          bottomLeft: Radius.circular(isUser ? 18 : 4),
+          bottomRight: Radius.circular(isUser ? 4 : 18),
         ),
-        child: Text(
-          msg.content,
-          style: TextStyle(
-            color: isUser ? const Color(0xFF1B2838) : AppColors.textPrimary,
-            fontSize: 14,
-            height: 1.5,
-          ),
+        border: isUser
+            ? null
+            : Border.all(color: AppColors.glassBorder(0.6)),
+      ),
+      child: Text(
+        msg.content,
+        style: TextStyle(
+          color: isUser ? Colors.white : AppColors.textPrimary,
+          fontSize: 14,
+          height: 1.5,
         ),
       ),
-    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
+    );
+
+    if (isUser) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: bubble,
+      ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
+    } else {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(right: 8, top: 4),
+              width: 32,
+              height: 32,
+              child: SvgPicture.asset('assets/icons/ite_chat.svg'),
+            ),
+            Flexible(child: bubble),
+          ],
+        ),
+      ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
+    }
   }
 
   Widget _buildTypingIndicator() {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDark,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-              color: AppColors.textMuted.withValues(alpha: 0.12)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...List.generate(
-              3,
-              (i) => Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
-                ),
-              )
-                  .animate(onPlay: (c) => c.repeat())
-                  .fadeIn(delay: Duration(milliseconds: i * 200))
-                  .fadeOut(delay: 600.ms),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(right: 8, top: 4),
+            width: 32,
+            height: 32,
+            child: SvgPicture.asset('assets/icons/ite_chat.svg'),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.glassWhite(0.85),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.glassBorder(0.6)),
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...List.generate(
+                  3,
+                  (i) => Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                  )
+                      .animate(onPlay: (c) => c.repeat())
+                      .fadeIn(delay: Duration(milliseconds: i * 200))
+                      .fadeOut(delay: 600.ms),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -302,10 +404,10 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.auto_awesome, color: AppColors.primary, size: 20),
+                SvgPicture.asset('assets/icons/ite_chat.svg', width: 28, height: 28),
                 const SizedBox(width: 8),
                 Text(
-                  'AI Konsultan Bisnis',
+                  'Ite si Konsultan Bisnis',
                   style: AppTheme.displayFont(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -316,7 +418,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'AI ini punya konteks dari riwayat analisis idemu, jadi bisa kasih saran yang spesifik — bukan jawaban template.',
+              'Halo Kak! Aku Ite 🐻, beruang konsultan bisnismu! Aku udah baca-baca riwayat cek ide bisnismu, lho.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -325,10 +427,10 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Belum pernah cek ide? Coba Cek Ide Bisnis dulu supaya AI bisa bantu lebih dalam.',
+              'Ada yang bikin bingung soal modal, cara promosi, atau peluang pasar? Sini cerita, biar Ite bantu carikan celahnya!',
               style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 12,
+                color: AppColors.textSecondary,
+                fontSize: 13,
                 height: 1.5,
               ),
             ),
@@ -337,9 +439,9 @@ class _ChatScreenState extends State<ChatScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _suggestionChip('Kenapa persaingan saya tinggi?'),
-                _suggestionChip('Gimana strategi biar beda dari yang lain?'),
-                _suggestionChip('Kira-kira modal awalnya berapa?'),
+                _suggestionChip('Gimana strategi promosi yang pas?'),
+                _suggestionChip('Bantu bedain usahaku dari pesaing dong!'),
+                _suggestionChip('Berapa ya modal awal buat ideku?'),
               ],
             ),
           ],

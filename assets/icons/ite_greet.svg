@@ -1,0 +1,36 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Motion Lines for Waving -->
+  <path d="M44 16 Q 47 20 44 24" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" fill="none" />
+  
+  <!-- Ears -->
+  <circle cx="12" cy="14" r="6" fill="#E8961F" stroke="#1E1E1E" stroke-width="3" />
+  <circle cx="36" cy="14" r="6" fill="#E8961F" stroke="#1E1E1E" stroke-width="3" />
+  <!-- Inner Ears -->
+  <circle cx="12" cy="14" r="2.5" fill="#CB7E12" />
+  <circle cx="36" cy="14" r="2.5" fill="#CB7E12" />
+  
+  <!-- Head -->
+  <rect x="8" y="12" width="32" height="28" rx="14" fill="#E8961F" stroke="#1E1E1E" stroke-width="3" />
+  
+  <!-- Muzzle -->
+  <ellipse cx="24" cy="30" rx="10" ry="7" fill="#FFFFFF" stroke="#1E1E1E" stroke-width="2" />
+  <!-- Nose -->
+  <ellipse cx="24" cy="27" rx="3" ry="2" fill="#1E1E1E" />
+  <!-- Mouth (Smile) -->
+  <path d="M20 31 C 20 34, 28 34, 28 31" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" fill="none" />
+  
+  <!-- Eyes: Winking (Left closed smile, Right open) -->
+  <path d="M15 21 Q 17 18 19 21" stroke="#1E1E1E" stroke-width="3" stroke-linecap="round" fill="none" />
+  <circle cx="31" cy="21" r="2.5" fill="#1E1E1E" />
+
+  <!-- Waving Hand (Right) -->
+  <g transform="translate(38, 28) rotate(20)">
+    <!-- Base Paw -->
+    <rect x="-4" y="-10" width="12" height="16" rx="6" fill="#E8961F" stroke="#1E1E1E" stroke-width="2.5" />
+    <!-- Paw pads -->
+    <ellipse cx="2" cy="-1" rx="2.5" ry="3" fill="#FFFFFF" />
+    <circle cx="-1" cy="-6" r="1.5" fill="#FFFFFF" />
+    <circle cx="2" cy="-7.5" r="1.5" fill="#FFFFFF" />
+    <circle cx="5" cy="-6" r="1.5" fill="#FFFFFF" />
+  </g>
+</svg>

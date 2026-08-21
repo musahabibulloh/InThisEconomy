@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:ui';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../config/app_colors.dart';
 
 class MainLayout extends StatelessWidget {
@@ -22,9 +23,59 @@ class MainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      backgroundColor: AppColors.bgLight,
+      body: Stack(
+        children: [
+          // Colorful blobs for Glassmorphism background refraction
+          Positioned(
+            top: -100,
+            right: -50,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 50,
+            left: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.secondary.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.3,
+            left: MediaQuery.of(context).size.width * 0.4,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accent.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          // Blur the blobs to create a smooth mesh gradient effect
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: const SizedBox(),
+            ),
+          ),
+          // Main content on top
+          navigationShell,
+        ],
+      ),
       extendBody: true, // Allows body to scroll under the transparent nav bar
-      bottomNavigationBar: _PasarSoreBottomNav(
+      bottomNavigationBar: _GlassBottomNav(
         currentIndex: navigationShell.currentIndex,
         onTap: _goBranch,
       ),
@@ -32,53 +83,59 @@ class MainLayout extends StatelessWidget {
   }
 }
 
-class _PasarSoreBottomNav extends StatelessWidget {
+class _GlassBottomNav extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const _PasarSoreBottomNav({
+  const _GlassBottomNav({
     required this.currentIndex,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Signature: Glassmorphism base with floating central action
+    // Floating glass navigation bar — frosted white, hovering above content
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppColors.glassShadow(0.08),
+            blurRadius: 24,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.glassShadow(0.04),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             height: 72,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: AppColors.surfaceDark.withValues(alpha: 0.8),
+              color: AppColors.glassWhite(0.4),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: AppColors.textMuted.withValues(alpha: 0.15),
+                color: AppColors.glassBorder(0.5),
                 width: 1,
               ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildNavItem(0, Icons.space_dashboard_rounded, 'Beranda'),
-                _buildNavItem(1, Icons.explore_rounded, 'Pasar'),
-                _buildCenterItem(2, Icons.lightbulb_rounded),
-                _buildNavItem(3, Icons.chat_bubble_rounded, 'AI Chat'),
-                _buildNavItem(4, Icons.camera_alt_rounded, 'Foto'),
+                _buildNavItem(0, 'assets/icons/ite_dashboard.svg', 'Beranda'),
+                _buildNavItem(1, 'assets/icons/ite_market.svg', 'Pasar'),
+                _buildCenterItem(2, 'assets/icons/ite_idea.svg'),
+                _buildNavItem(3, 'assets/icons/ite_chat.svg', 'AI Chat'),
+                _buildNavItem(4, 'assets/icons/ite_camera.svg', 'Produk'),
               ],
             ),
           ),
@@ -87,9 +144,9 @@ class _PasarSoreBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(int index, dynamic iconDataOrPath, String label) {
     final isActive = currentIndex == index;
-    final color = isActive ? AppColors.primaryLight : AppColors.textMuted;
+    final color = isActive ? AppColors.primary : AppColors.textMuted;
 
     return GestureDetector(
       onTap: () => onTap(index),
@@ -99,7 +156,7 @@ class _PasarSoreBottomNav extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Signature interaction: Active indicator dot slides in
+            // Active indicator: a sliding glass pill
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutCubic,
@@ -112,7 +169,7 @@ class _PasarSoreBottomNav extends StatelessWidget {
                 boxShadow: isActive
                     ? [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.5),
+                          color: AppColors.primary.withValues(alpha: 0.4),
                           blurRadius: 6,
                           spreadRadius: 1,
                         )
@@ -120,22 +177,32 @@ class _PasarSoreBottomNav extends StatelessWidget {
                     : [],
               ),
             ),
-            Icon(
-              icon,
-              color: color,
-              size: 24,
-            ).animate(target: isActive ? 1 : 0).scale(
-                  end: const Offset(1.1, 1.1),
-                  duration: 200.ms,
-                  curve: Curves.easeOut,
-                ),
+            iconDataOrPath is IconData
+                ? Icon(
+                    iconDataOrPath,
+                    color: color,
+                    size: 24,
+                  ).animate(target: isActive ? 1 : 0).scale(
+                      end: const Offset(1.1, 1.1),
+                      duration: 200.ms,
+                      curve: Curves.easeOut,
+                    )
+                : SvgPicture.asset(
+                    iconDataOrPath as String,
+                    width: 26,
+                    height: 26,
+                  ).animate(target: isActive ? 1 : 0).scale(
+                      end: const Offset(1.15, 1.15),
+                      duration: 200.ms,
+                      curve: Curves.easeOut,
+                    ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 color: color,
                 fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],
@@ -144,7 +211,7 @@ class _PasarSoreBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildCenterItem(int index, IconData icon) {
+  Widget _buildCenterItem(int index, dynamic iconDataOrPath) {
     final isActive = currentIndex == index;
 
     return GestureDetector(
@@ -157,21 +224,27 @@ class _PasarSoreBottomNav extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.4),
+              color: AppColors.primary.withValues(alpha: 0.35),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Center(
-          child: Icon(
-            icon,
-            color: const Color(0xFF1B2838), // Dark contrast icon
-            size: 28,
-          )
+          child: (iconDataOrPath is IconData
+                  ? Icon(
+                      iconDataOrPath,
+                      color: Colors.white,
+                      size: 28,
+                    )
+                  : SvgPicture.asset(
+                      iconDataOrPath as String,
+                      width: 38,
+                      height: 38,
+                    ))
               .animate(target: isActive ? 1 : 0)
               .rotate(end: 0.05, duration: 300.ms) // Subtle playful tilt
-              .scale(end: const Offset(1.1, 1.1), duration: 200.ms),
+              .scale(end: const Offset(1.15, 1.15), duration: 200.ms),
         ),
       ),
     );

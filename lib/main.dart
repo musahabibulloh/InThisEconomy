@@ -10,12 +10,13 @@ void main() async {
   // Load environment variables
   await dotenv.load(fileName: ".env");
 
-  // Set system UI style
+  // Set system UI style — light theme: dark icons on transparent status bar
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: Color(0xFF1B2838),
-    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,       // Dark icons on light bg
+    statusBarBrightness: Brightness.light,           // iOS: light status bar
+    systemNavigationBarColor: Color(0xFFF7F4EF),    // Match bgLight
+    systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
   // Initialize Supabase

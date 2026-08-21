@@ -77,7 +77,7 @@ class _PhotoEditorScreenState extends State<PhotoEditorScreen> {
         child: RefreshIndicator(
           onRefresh: _loadPhotos,
           color: AppColors.primary,
-          backgroundColor: AppColors.surfaceDark,
+          backgroundColor: AppColors.bgLightSecondary,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(), // Memastikan selalu bisa ditarik walau item sedikit
             slivers: [
@@ -253,7 +253,7 @@ class _PhotoEditorScreenState extends State<PhotoEditorScreen> {
                             Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: AppColors.bgDark,
+                                  color: AppColors.bgLightSecondary,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Center(

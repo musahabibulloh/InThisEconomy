@@ -173,9 +173,9 @@ class _GaugePainter extends CustomPainter {
     const startAngle = math.pi; // 180° (left)
     const sweepAngle = math.pi; // 180° sweep to right
 
-    // Background arc (track)
+    // Background arc (track) — light gray on light theme
     final trackPaint = Paint()
-      ..color = AppColors.textMuted.withValues(alpha: 0.12)
+      ..color = AppColors.textMuted.withValues(alpha: 0.15)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10
       ..strokeCap = StrokeCap.round;
@@ -225,19 +225,19 @@ class _GaugePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(center, needleEnd, needlePaint);
 
-    // Needle dot (center)
+    // Needle dot (center) — white core on light bg
     canvas.drawCircle(center, 5, Paint()..color = scoreColor);
     canvas.drawCircle(
       center,
       3,
-      Paint()..color = AppColors.bgDark,
+      Paint()..color = Colors.white,
     );
 
     // Tip glow
     canvas.drawCircle(
       needleEnd,
       4,
-      Paint()..color = scoreColor.withValues(alpha: 0.5),
+      Paint()..color = scoreColor.withValues(alpha: 0.4),
     );
     canvas.drawCircle(needleEnd, 2.5, Paint()..color = scoreColor);
   }

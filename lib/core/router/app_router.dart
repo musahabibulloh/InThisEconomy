@@ -10,7 +10,9 @@ import '../../features/idea_check/presentation/idea_history_screen.dart';
 import '../../features/market_gap/presentation/market_gap_screen.dart';
 import '../../features/market_gap/presentation/gap_result_screen.dart';
 import '../../features/ai_chat/presentation/chat_screen.dart';
-import '../../features/product_photo/presentation/photo_editor_screen.dart';
+import '../../features/product_photo/presentation/product_studio_screen.dart';
+import '../../features/product_photo/presentation/enhance_photo_screen.dart';
+import '../../features/product_photo/presentation/generate_photo_screen.dart';
 import '../widgets/main_layout.dart';
 
 class AppRouter {
@@ -120,7 +122,24 @@ class AppRouter {
               GoRoute(
                 path: '/product-photo',
                 name: 'productPhoto',
-                builder: (context, state) => const PhotoEditorScreen(),
+                builder: (context, state) => const ProductStudioScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'enhance',
+                    name: 'enhancePhoto',
+                    builder: (context, state) => const EnhancePhotoScreen(),
+                  ),
+                  GoRoute(
+                    path: 'generate',
+                    name: 'generatePhoto',
+                    builder: (context, state) => const GeneratePhotoScreen(),
+                  ),
+                  GoRoute(
+                    path: 'history',
+                    name: 'studioHistory',
+                    builder: (context, state) => const Scaffold(body: Center(child: Text('Riwayat Studio'))),
+                  ),
+                ]
               ),
             ],
           ),

@@ -1,0 +1,33 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ears -->
+  <circle cx="12" cy="14" r="6" fill="#E8961F" stroke="#1E1E1E" stroke-width="3" />
+  <circle cx="36" cy="14" r="6" fill="#E8961F" stroke="#1E1E1E" stroke-width="3" />
+  <!-- Inner Ears -->
+  <circle cx="12" cy="14" r="2.5" fill="#CB7E12" />
+  <circle cx="36" cy="14" r="2.5" fill="#CB7E12" />
+  
+  <!-- Head -->
+  <rect x="8" y="12" width="32" height="28" rx="14" fill="#E8961F" stroke="#1E1E1E" stroke-width="3" />
+  
+  <!-- Confident Eyes -->
+  <path d="M14 20 Q 17 22 20 20" stroke="#1E1E1E" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M28 20 Q 31 22 34 20" stroke="#1E1E1E" stroke-width="3" stroke-linecap="round" fill="none" />
+
+  <!-- Muzzle -->
+  <ellipse cx="24" cy="28" rx="10" ry="7" fill="#FFFFFF" stroke="#1E1E1E" stroke-width="2" />
+  <!-- Nose -->
+  <ellipse cx="24" cy="25" rx="3" ry="2" fill="#1E1E1E" />
+  <!-- Smirk -->
+  <path d="M22 30 Q 26 33 28 29" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" fill="none" />
+  
+  <!-- Money Bill -->
+  <g transform="translate(10, 32) rotate(-10)">
+    <rect x="0" y="0" width="28" height="14" rx="2" fill="#2BA69E" stroke="#1E1E1E" stroke-width="2.5" />
+    <rect x="3" y="3" width="22" height="8" rx="1" fill="#4ECDC4" stroke="#1E1E1E" stroke-width="1.5" />
+    <circle cx="14" cy="7" r="2.5" fill="#1E1E1E" />
+  </g>
+
+  <!-- Paws holding the money -->
+  <circle cx="16" cy="38" r="4" fill="#E8961F" stroke="#1E1E1E" stroke-width="2.5" />
+  <circle cx="34" cy="35" r="4" fill="#E8961F" stroke="#1E1E1E" stroke-width="2.5" />
+</svg>

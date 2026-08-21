@@ -96,7 +96,7 @@ class _IdeaHistoryScreenState extends State<IdeaHistoryScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: const Icon(Icons.lightbulb_outline,
-                                color: Color(0xFF1B2838), size: 22),
+                                color: Colors.white, size: 22),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
