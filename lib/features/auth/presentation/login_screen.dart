@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
+import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../data/auth_repository.dart';
 
@@ -62,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 60),
 
-              // Logo / Brand
+              // Logo / Brand — lantern-gold icon
               Center(
                 child: Container(
                   width: 80,
@@ -80,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: const Icon(
                     Icons.lightbulb_outline_rounded,
-                    color: Colors.white,
+                    color: Color(0xFF1B2838),
                     size: 40,
                   ),
                 ),
@@ -91,20 +92,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 32),
 
-              // Title
+              // Title — uses display font
               Center(
                 child: Column(
                   children: [
                     Text(
                       'ValidasiIde',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                          ),
+                      style: AppTheme.displayFont(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Validasi ide bisnismu sebelum mulai',
+                      'Validasi ide bisnismu sebelum keluar modal',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -199,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // Login button
                     GradientButton(
-                      text: 'Masuk',
+                      text: 'Masuk ke Akun',
                       onPressed: _handleLogin,
                       isLoading: _isLoading,
                       icon: Icons.arrow_forward_rounded,
@@ -223,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 text: 'Daftar',
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],

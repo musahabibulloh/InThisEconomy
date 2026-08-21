@@ -11,6 +11,7 @@ import '../../features/market_gap/presentation/market_gap_screen.dart';
 import '../../features/market_gap/presentation/gap_result_screen.dart';
 import '../../features/ai_chat/presentation/chat_screen.dart';
 import '../../features/product_photo/presentation/photo_editor_screen.dart';
+import '../widgets/main_layout.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -43,51 +44,87 @@ class AppRouter {
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(
-        path: '/dashboard',
-        name: 'dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: '/idea-check',
-        name: 'ideaCheck',
-        builder: (context, state) => const IdeaInputScreen(),
-      ),
-      GoRoute(
-        path: '/idea-check/result/:id',
-        name: 'ideaResult',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return AnalysisResultScreen(analysisId: id);
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainLayout(navigationShell: navigationShell);
         },
-      ),
-      GoRoute(
-        path: '/idea-check/history',
-        name: 'ideaHistory',
-        builder: (context, state) => const IdeaHistoryScreen(),
-      ),
-      GoRoute(
-        path: '/market-gap',
-        name: 'marketGap',
-        builder: (context, state) => const MarketGapScreen(),
-      ),
-      GoRoute(
-        path: '/market-gap/result/:id',
-        name: 'gapResult',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return GapResultScreen(scanId: id);
-        },
-      ),
-      GoRoute(
-        path: '/ai-chat',
-        name: 'aiChat',
-        builder: (context, state) => const ChatScreen(),
-      ),
-      GoRoute(
-        path: '/product-photo',
-        name: 'productPhoto',
-        builder: (context, state) => const PhotoEditorScreen(),
+        branches: [
+          // Branch 0: Dashboard (Home)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                name: 'dashboard',
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          // Branch 1: Market Gap
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/market-gap',
+                name: 'marketGap',
+                builder: (context, state) => const MarketGapScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'result/:id',
+                    name: 'gapResult',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return GapResultScreen(scanId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 2: Idea Check (Core feature)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/idea-check',
+                name: 'ideaCheck',
+                builder: (context, state) => const IdeaInputScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'result/:id',
+                    name: 'ideaResult',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return AnalysisResultScreen(analysisId: id);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'history',
+                    name: 'ideaHistory',
+                    builder: (context, state) => const IdeaHistoryScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 3: AI Chat
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/ai-chat',
+                name: 'aiChat',
+                builder: (context, state) => const ChatScreen(),
+              ),
+            ],
+          ),
+          // Branch 4: Product Photo
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/product-photo',
+                name: 'productPhoto',
+                builder: (context, state) => const PhotoEditorScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

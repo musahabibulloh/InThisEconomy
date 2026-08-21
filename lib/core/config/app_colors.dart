@@ -1,39 +1,41 @@
 import 'package:flutter/material.dart';
 
+/// Color palette inspired by Indonesian traditional market at dusk (pasar sore).
+/// Warm evening blues, golden lantern light, fresh banana leaf greens, and fiery chili reds.
 class AppColors {
-  // Primary palette - Deep indigo to violet gradient
-  static const Color primary = Color(0xFF6C5CE7);
-  static const Color primaryLight = Color(0xFF8B7CF6);
-  static const Color primaryDark = Color(0xFF4C3ED1);
+  // ── Primary: Kuning Lampu (lantern gold) ──
+  static const Color primary = Color(0xFFF2A93B);
+  static const Color primaryLight = Color(0xFFFFCA6E);
+  static const Color primaryDark = Color(0xFFD48A1E);
 
-  // Secondary palette - Teal accent
-  static const Color secondary = Color(0xFF00CEC9);
-  static const Color secondaryLight = Color(0xFF55E6C1);
-  static const Color secondaryDark = Color(0xFF009E98);
+  // ── Secondary: Hijau Daun Pisang (banana leaf teal) ──
+  static const Color secondary = Color(0xFF4ECDC4);
+  static const Color secondaryLight = Color(0xFF7EDDD6);
+  static const Color secondaryDark = Color(0xFF2BA69E);
 
-  // Accent - Warm coral
+  // ── Accent: Merah Cabai (chili red) ──
   static const Color accent = Color(0xFFFF6B6B);
-  static const Color accentLight = Color(0xFFFF8E8E);
+  static const Color accentLight = Color(0xFFFF9B9B);
 
-  // Background & Surface (Dark mode)
-  static const Color bgDark = Color(0xFF0F0F23);
-  static const Color bgDarkSecondary = Color(0xFF1A1A3E);
-  static const Color surfaceDark = Color(0xFF252550);
-  static const Color surfaceDarkElevated = Color(0xFF2D2D5E);
+  // ── Background & Surface (Biru Senja — dusk blue) ──
+  static const Color bgDark = Color(0xFF1B2838);
+  static const Color bgDarkSecondary = Color(0xFF1F3044);
+  static const Color surfaceDark = Color(0xFF243447);
+  static const Color surfaceDarkElevated = Color(0xFF2C3E52);
 
-  // Text
-  static const Color textPrimary = Color(0xFFF5F5FF);
-  static const Color textSecondary = Color(0xFFB0B0D0);
-  static const Color textMuted = Color(0xFF7070A0);
+  // ── Text (Kapur & Asap) ──
+  static const Color textPrimary = Color(0xFFE8E6DF);
+  static const Color textSecondary = Color(0xFFB0BEC5);
+  static const Color textMuted = Color(0xFF8899AA);
 
-  // Score colors
-  static const Color scoreHigh = Color(0xFF00E676);
-  static const Color scoreMedium = Color(0xFFFFAB40);
-  static const Color scoreLow = Color(0xFFFF5252);
+  // ── Score/Status colors (thematic, not generic semaphore) ──
+  static const Color scoreHigh = Color(0xFF4ECDC4);    // daunan — subur, tumbuh
+  static const Color scoreMedium = Color(0xFFF2A93B);   // lampu — perlu perhatian
+  static const Color scoreLow = Color(0xFFFF6B6B);      // cabai — panas, berisiko
 
-  // Gradients
+  // ── Gradients ──
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, Color(0xFF9B59B6)],
+    colors: [Color(0xFFF2A93B), Color(0xFFE8851C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -45,7 +47,7 @@ class AppColors {
   );
 
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [secondary, Color(0xFF6C5CE7)],
+    colors: [secondary, Color(0xFF2BA69E)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -54,5 +56,11 @@ class AppColors {
     colors: [accent, Color(0xFFE55039)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  /// Gradient for the Market Meter gauge (low → medium → high)
+  static const LinearGradient gaugeGradient = LinearGradient(
+    colors: [scoreLow, scoreMedium, scoreHigh],
+    stops: [0.0, 0.5, 1.0],
   );
 }

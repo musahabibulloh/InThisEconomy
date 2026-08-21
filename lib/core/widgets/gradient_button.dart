@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../config/app_colors.dart';
 
+/// Primary CTA button with gradient background and glow shadow.
+/// Text is dark-on-gold for the warm primary, white for accent gradients.
 class GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -19,14 +21,24 @@ class GradientButton extends StatelessWidget {
     this.width,
   });
 
+  /// Decide text/icon color based on gradient brightness.
+  /// Primary (gold) uses dark text; accent/danger/secondary use white.
+  Color get _foregroundColor {
+    if (gradient == null || gradient == AppColors.primaryGradient) {
+      return const Color(0xFF1B2838);
+    }
+    return Colors.white;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onPressed != null;
     return SizedBox(
       width: width ?? double.infinity,
       height: 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: onPressed != null
+          gradient: isEnabled
               ? (gradient ?? AppColors.primaryGradient)
               : LinearGradient(
                   colors: [
@@ -34,11 +46,14 @@ class GradientButton extends StatelessWidget {
                     AppColors.textMuted.withValues(alpha: 0.2),
                   ],
                 ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: onPressed != null
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: isEnabled
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.4),
+                    color: (gradient ?? AppColors.primaryGradient)
+                        .colors
+                        .first
+                        .withValues(alpha: 0.35),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -50,35 +65,41 @@ class GradientButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
+            foregroundColor: _foregroundColor,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(28),
             ),
           ),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(_foregroundColor),
                   ),
                 )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, size: 20),
-                      const SizedBox(width: 10),
-                    ],
-                    Text(
-                      text,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, size: 18, color: _foregroundColor),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        text,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                          color: _foregroundColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
         ),
       ),

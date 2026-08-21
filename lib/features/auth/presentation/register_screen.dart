@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
+import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../data/auth_repository.dart';
 
@@ -46,11 +47,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
-                'Registrasi berhasil! Silakan cek email untuk verifikasi.'),
+                'Registrasi berhasil! Anda telah masuk.'),
             backgroundColor: AppColors.scoreHigh,
           ),
         );
-        context.go('/login');
+        context.go('/dashboard');
       }
     } catch (e) {
       if (mounted) {
@@ -84,10 +85,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 20),
               Text(
                 'Buat Akun',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
+                style: AppTheme.displayFont(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
               ).animate().fadeIn(duration: 600.ms),
               const SizedBox(height: 8),
               Text(
@@ -199,7 +201,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 32),
                     GradientButton(
-                      text: 'Daftar',
+                      text: 'Buat Akun Sekarang',
                       onPressed: _handleRegister,
                       isLoading: _isLoading,
                       icon: Icons.person_add_outlined,
@@ -220,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 text: 'Masuk',
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],

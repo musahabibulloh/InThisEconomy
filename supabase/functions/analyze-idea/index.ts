@@ -118,7 +118,7 @@ async function getTrendData(keyword: string): Promise<any> {
 
 // Generate narrative analysis via Gemini
 async function generateAnalysis(context: any): Promise<any> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`
 
   const prompt = `Kamu adalah konsultan bisnis UMKM Indonesia. Analisis data berikut dan berikan output dalam bahasa Indonesia:
 
@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
     const { input_text, latitude, longitude, location_name, radius_km } = await req.json()
 
     // Extract product category from input text using Gemini
-    const extractUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
+    const extractUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`
     const extractResp = await fetch(extractUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

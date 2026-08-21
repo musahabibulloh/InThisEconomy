@@ -11,21 +11,18 @@ class AuthRepository {
     required String password,
     String? displayName,
   }) async {
-    final response = await _client.auth.signUp(
+    // 1. Bypass Supabase default email limits using custom RPC
+    await _client.rpc('register_fake_user', params: {
+      'email_input': email,
+      'password_input': password,
+      'display_name_input': displayName ?? email.split('@').first,
+    });
+
+    // 2. Log in immediately since the user is auto-confirmed in DB
+    return await _client.auth.signInWithPassword(
       email: email,
       password: password,
-      data: {'display_name': displayName},
     );
-
-    // Create profile entry
-    if (response.user != null) {
-      await _client.from('profiles').upsert({
-        'id': response.user!.id,
-        'display_name': displayName ?? email.split('@').first,
-      });
-    }
-
-    return response;
   }
 
   Future<AuthResponse> signIn({

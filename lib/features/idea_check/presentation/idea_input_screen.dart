@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
+import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../data/idea_check_repository.dart';
@@ -52,7 +53,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text('Gagal menganalisis: ${e.toString()}'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -74,7 +75,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
             child: Column(
@@ -86,8 +87,8 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                 GlassCard(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primary.withValues(alpha: 0.15),
-                      AppColors.primary.withValues(alpha: 0.05),
+                      AppColors.primary.withValues(alpha: 0.1),
+                      AppColors.primary.withValues(alpha: 0.03),
                     ],
                   ),
                   child: Row(
@@ -95,7 +96,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.2),
+                          color: AppColors.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -107,7 +108,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(
-                          'Ceritakan ide bisnis dan lokasi yang kamu inginkan. Kami akan menganalisis kompetitor, tren, dan peluangmu.',
+                          'Ceritakan ide bisnismu dan pilih lokasi. Kami cek kompetitor, tren, dan peluangmu di sana.',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,
@@ -123,7 +124,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
 
                 // Idea input
                 _buildSectionTitle(
-                  'Ide Bisnis',
+                  'Ide Bisnis Kamu',
                   Icons.lightbulb_outline_rounded,
                 ),
                 const SizedBox(height: 10),
@@ -132,7 +133,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                   maxLines: 3,
                   decoration: InputDecoration(
                     hintText:
-                        'Contoh: Saya ingin menjual dessert box, minuman boba, atau warung bakso...',
+                        'Contoh: Jualan dessert box, warung bakso, laundry kiloan...',
                     hintStyle: TextStyle(
                       color: AppColors.textMuted.withValues(alpha: 0.6),
                       height: 1.5,
@@ -140,10 +141,10 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Silakan jelaskan ide bisnismu';
+                      return 'Tulis ide bisnismu dulu, ya';
                     }
                     if (value.length < 5) {
-                      return 'Jelaskan lebih detail';
+                      return 'Coba jelaskan lebih detail biar hasilnya lebih akurat';
                     }
                     return null;
                   },
@@ -155,7 +156,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                 const SizedBox(height: 24),
 
                 // Location input
-                _buildSectionTitle('Lokasi Usaha', Icons.location_on_outlined),
+                _buildSectionTitle('Di Mana Lokasinya?', Icons.location_on_outlined),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _locationController,
@@ -166,20 +167,20 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                     suffixIcon: Container(
                       margin: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.15),
+                        color: AppColors.primary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.my_location_rounded,
                             color: AppColors.primaryLight, size: 20),
                         onPressed: _useCurrentLocation,
-                        tooltip: 'Gunakan lokasi saat ini',
+                        tooltip: 'Pakai lokasi saat ini',
                       ),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Lokasi wajib diisi';
+                      return 'Isi lokasi supaya kami bisa cek kompetitor di sekitarnya';
                     }
                     return null;
                   },
@@ -215,7 +216,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
 
                 // Radius slider
                 _buildSectionTitle(
-                  'Radius Pencarian',
+                  'Seberapa Jauh Mau Dicek?',
                   Icons.radar_rounded,
                 ),
                 const SizedBox(height: 10),
@@ -226,7 +227,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Jarak dari titik lokasi',
+                            'Radius dari titik lokasi',
                             style: TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 13,
@@ -236,15 +237,15 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.15),
+                              color: AppColors.primary.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               '${_radiusKm.toStringAsFixed(1)} km',
-                              style: TextStyle(
-                                color: AppColors.primaryLight,
-                                fontWeight: FontWeight.w700,
+                              style: AppTheme.displayFont(
                                 fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryLight,
                               ),
                             ),
                           ),
@@ -255,10 +256,10 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                         data: SliderThemeData(
                           activeTrackColor: AppColors.primary,
                           inactiveTrackColor:
-                              AppColors.textMuted.withValues(alpha: 0.2),
+                              AppColors.textMuted.withValues(alpha: 0.15),
                           thumbColor: AppColors.primaryLight,
                           overlayColor:
-                              AppColors.primary.withValues(alpha: 0.15),
+                              AppColors.primary.withValues(alpha: 0.12),
                           trackHeight: 4,
                         ),
                         child: Slider(
@@ -288,29 +289,29 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                     .fadeIn(delay: 300.ms, duration: 400.ms)
                     .slideY(begin: 0.15, end: 0),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
-                // Disclaimer
+                // Disclaimer — honest, not scary
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.scoreMedium.withValues(alpha: 0.08),
+                    color: AppColors.textMuted.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.scoreMedium.withValues(alpha: 0.2),
+                      color: AppColors.textMuted.withValues(alpha: 0.1),
                     ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.warning_amber_rounded,
-                          color: AppColors.scoreMedium, size: 18),
+                      Icon(Icons.info_outline_rounded,
+                          color: AppColors.textMuted, size: 16),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Hasil analisis berdasarkan data Google Maps & tren pencarian. Data mungkin tidak mencakup UMKM rumahan yang hanya jualan online. Gunakan sebagai perkiraan, bukan jaminan.',
+                          'Hasil berdasarkan data Google Maps & tren pencarian. UMKM rumahan yang hanya online mungkin belum tercakup — jadikan ini panduan, bukan jaminan.',
                           style: TextStyle(
-                            color: AppColors.scoreMedium.withValues(alpha: 0.9),
+                            color: AppColors.textMuted,
                             fontSize: 11,
                             height: 1.5,
                           ),
@@ -324,7 +325,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
 
                 // Analyze button
                 GradientButton(
-                  text: 'Analisis Ide Saya',
+                  text: 'Cek Peluang di Sini',
                   onPressed: _handleAnalyze,
                   isLoading: _isLoading,
                   icon: Icons.auto_awesome_rounded,

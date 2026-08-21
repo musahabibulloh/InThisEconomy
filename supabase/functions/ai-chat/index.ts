@@ -59,7 +59,7 @@ Jika pertanyaan tidak terkait riwayat, berikan jawaban umum yang tetap bermanfaa
 Jawab dalam bahasa Indonesia, ringkas tapi informatif (maksimal 3 paragraf).
 Jangan pernah menyebut bahwa kamu adalah AI atau chatbot — berperilaku seperti konsultan profesional.`
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`
 
     const contents = [
       { role: "user", parts: [{ text: systemPrompt }] },
@@ -78,6 +78,11 @@ Jangan pernah menyebut bahwa kamu adalah AI atau chatbot — berperilaku seperti
     })
 
     const data = await resp.json()
+    if (data.error) {
+      return new Response(JSON.stringify({ response: `Gemini Error: ${data.error.message}` }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak bisa memproses pertanyaan saat ini."
 
     return new Response(JSON.stringify({ response: aiResponse }), {

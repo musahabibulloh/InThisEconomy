@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
     // Use Gemini to generate reasons and estimated capital
     const gapCandidates = categoryResults.filter(c => c.count <= 3).slice(0, 8)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`
     const prompt = `Kamu adalah konsultan bisnis UMKM Indonesia. Untuk lokasi "${location_name || `${latitude},${longitude}`}" dengan profil area: ${JSON.stringify(areaProfile)} dan kepadatan "${areaDensity}", berikut kategori bisnis yang minim pesaing:
 
 ${gapCandidates.map(c => `- ${c.label}: ${c.count} kompetitor`).join("\n")}
