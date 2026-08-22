@@ -5,7 +5,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY")!
+const FOURSQUARE_API_KEY = Deno.env.get("FOURSQUARE_API_KEY")!
 const SERPAPI_KEY = Deno.env.get("SERPAPI_KEY")!
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!
 
@@ -21,70 +21,53 @@ interface PlaceResult {
   place_id: string
 }
 
-// Search Google Places API (New) for nearby competitors
+// Search Foursquare Places API for nearby competitors
 async function searchNearbyCompetitors(
   category: string, lat: number, lng: number, radiusMeters: number
 ): Promise<PlaceResult[]> {
-  const url = "https://places.googleapis.com/v1/places:searchNearby"
-  const body = {
-    includedTypes: [mapCategoryToPlaceType(category)],
-    maxResultCount: 20,
-    locationRestriction: {
-      circle: {
-        center: { latitude: lat, longitude: lng },
-        radius: radiusMeters,
-      },
-    },
-  }
+  const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${radiusMeters}&query=${category}&limit=20`
 
   const resp = await fetch(url, {
-    method: "POST",
+    method: "GET",
     headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
-      "X-Goog-FieldMask": "places.displayName,places.rating,places.formattedAddress,places.id",
-    },
-    body: JSON.stringify(body),
+      "Accept": "application/json",
+      "Authorization": FOURSQUARE_API_KEY,
+    }
   })
 
+  if (!resp.ok) return [];
   const data = await resp.json()
-  const places = data.places || []
+  const places = data.results || []
 
   return places.map((p: any) => ({
-    name: p.displayName?.text || "Unknown",
-    rating: p.rating || 0,
-    address: p.formattedAddress || "",
-    place_id: p.id || "",
+    name: p.name || "Unknown",
+    rating: (p.rating || 0) / 2, // Foursquare rating is 1-10, scale to 1-5
+    address: p.location?.formatted_address || p.location?.address || "",
+    place_id: p.fsq_id || "",
   }))
 }
 
 // Search nearby area types (for target market profiling)
 async function profileArea(lat: number, lng: number, radiusMeters: number): Promise<any> {
-  const areaTypes = ["university", "school", "shopping_mall", "tourist_attraction", "hospital", "office"]
+  const areaTypes = ["university", "school", "mall", "tourist", "hospital", "office"]
   const results: Record<string, number> = {}
 
   for (const type of areaTypes) {
-    const url = "https://places.googleapis.com/v1/places:searchNearby"
-    const body = {
-      includedTypes: [type],
-      maxResultCount: 5,
-      locationRestriction: {
-        circle: { center: { latitude: lat, longitude: lng }, radius: radiusMeters },
-      },
-    }
-
+    const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${radiusMeters}&query=${type}&limit=5`
     const resp = await fetch(url, {
-      method: "POST",
+      method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
-        "X-Goog-FieldMask": "places.id",
-      },
-      body: JSON.stringify(body),
+        "Accept": "application/json",
+        "Authorization": FOURSQUARE_API_KEY,
+      }
     })
 
-    const data = await resp.json()
-    results[type] = (data.places || []).length
+    if (resp.ok) {
+       const data = await resp.json()
+       results[type] = (data.results || []).length
+    } else {
+       results[type] = 0;
+    }
   }
 
   return results
@@ -148,7 +131,7 @@ Pertimbangkan nuansa: kompetitor banyak tapi rating rendah = celah kualitas (pel
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+      generationConfig: { temperature: 0.7, maxOutputTokens: 4096, responseMimeType: "application/json" },
     }),
   })
 
@@ -156,18 +139,28 @@ Pertimbangkan nuansa: kompetitor banyak tapi rating rendah = celah kualitas (pel
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ""
 
   try {
-    // Try to parse as JSON (remove possible markdown code blocks)
-    const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
+    const cleaned = text.replace(/```json\n?/gi, "")
+                        .replace(/```\n?/g, "")
+                        .replace(/`/g, '"') // Fix hallucinated backticks
+                        .trim()
     return JSON.parse(cleaned)
-  } catch {
+  } catch (err) {
+    console.error("Failed to parse Gemini response:", err, text);
+    // Attempt an aggressive manual parsing as a last resort
+    const extract = (key: string) => {
+      const match = text.match(new RegExp(`"${key}"\\s*:\\s*"([^"]+)"`)) || 
+                    text.match(new RegExp(`${key}\\s*:\\s*"([^"]+)"`));
+      return match ? match[1] : "Data tidak tersedia";
+    }
+    
     return {
-      opportunity_score: "Sedang",
-      competition_score: "Sedang",
-      demand_score: "Sedang",
-      recommendation: text.slice(0, 200),
-      target_market_description: "Data tidak tersedia",
-      differentiation_analysis: "Data tidak tersedia",
-      trend_risk: "Data tidak tersedia",
+      opportunity_score: extract("opportunity_score") !== "Data tidak tersedia" ? extract("opportunity_score") : "Sedang",
+      competition_score: extract("competition_score") !== "Data tidak tersedia" ? extract("competition_score") : "Sedang",
+      demand_score: extract("demand_score") !== "Data tidak tersedia" ? extract("demand_score") : "Sedang",
+      recommendation: extract("recommendation") !== "Data tidak tersedia" ? extract("recommendation") : "Sistem AI sedang sibuk atau format data tidak valid. Silakan coba lagi.",
+      target_market_description: extract("target_market_description"),
+      differentiation_analysis: extract("differentiation_analysis"),
+      trend_risk: extract("trend_risk"),
     }
   }
 }

@@ -208,28 +208,31 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
           // ── Market Meters (signature element!) ──
           GlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                MarketMeter(
-                  score: r.opportunityScore ?? '—',
-                  label: 'Peluang',
-                  icon: Icons.trending_up_rounded,
-                  size: 100,
-                ),
-                MarketMeter(
-                  score: r.competitionScore ?? '—',
-                  label: 'Persaingan',
-                  icon: Icons.people_outline_rounded,
-                  size: 100,
-                ),
-                MarketMeter(
-                  score: r.demandScore ?? '—',
-                  label: 'Permintaan',
-                  icon: Icons.shopping_bag_outlined,
-                  size: 100,
-                ),
-              ],
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  MarketMeter(
+                    score: r.opportunityScore ?? '—',
+                    label: 'Peluang',
+                    icon: Icons.trending_up_rounded,
+                    size: 100,
+                  ),
+                  MarketMeter(
+                    score: r.competitionScore ?? '—',
+                    label: 'Persaingan',
+                    icon: Icons.people_outline_rounded,
+                    size: 100,
+                  ),
+                  MarketMeter(
+                    score: r.demandScore ?? '—',
+                    label: 'Permintaan',
+                    icon: Icons.shopping_bag_outlined,
+                    size: 100,
+                  ),
+                ],
+              ),
             ),
           ).animate().fadeIn(delay: 150.ms, duration: 500.ms),
 

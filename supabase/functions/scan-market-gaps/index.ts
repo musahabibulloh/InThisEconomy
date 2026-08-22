@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY")!
+const FOURSQUARE_API_KEY = Deno.env.get("FOURSQUARE_API_KEY")!
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!
 
 const corsHeaders = {
@@ -29,24 +29,17 @@ const CATEGORIES = [
 ]
 
 async function countNearby(type: string, lat: number, lng: number, radiusMeters: number): Promise<number> {
-  const url = "https://places.googleapis.com/v1/places:searchNearby"
+  const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${radiusMeters}&query=${type}&limit=50`
   const resp = await fetch(url, {
-    method: "POST",
+    method: "GET",
     headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
-      "X-Goog-FieldMask": "places.id",
-    },
-    body: JSON.stringify({
-      includedTypes: [type],
-      maxResultCount: 20,
-      locationRestriction: {
-        circle: { center: { latitude: lat, longitude: lng }, radius: radiusMeters },
-      },
-    }),
+      "Accept": "application/json",
+      "Authorization": FOURSQUARE_API_KEY,
+    }
   })
+  if (!resp.ok) return 0;
   const data = await resp.json()
-  return (data.places || []).length
+  return (data.results || []).length
 }
 
 async function profileArea(lat: number, lng: number, radiusMeters: number): Promise<Record<string, number>> {
@@ -99,7 +92,7 @@ Pertimbangkan: minim pesaing di area sepi bukan berarti peluang bagus. Beri skor
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 4096, responseMimeType: "application/json" },
       }),
     })
 
@@ -107,8 +100,16 @@ Pertimbangkan: minim pesaing di area sepi bukan berarti peluang bagus. Beri skor
     const geminiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
     let gapCategories: any[]
     try {
-      const cleaned = geminiText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
-      gapCategories = JSON.parse(cleaned)
+      const cleaned = geminiText.replace(/```json\n?/gi, "")
+                                .replace(/```\n?/g, "")
+                                .replace(/`/g, '"') // Fix hallucinated backticks
+                                .trim()
+      const gaps = JSON.parse(cleaned)
+    
+      if (!Array.isArray(gaps)) {
+         throw new Error("Output bukan array");
+      }
+      gapCategories = gaps;
     } catch {
       gapCategories = gapCandidates.map(c => ({
         category: c.label, competitor_count: c.count,

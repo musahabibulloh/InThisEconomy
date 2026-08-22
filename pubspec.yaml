@@ -16,6 +16,8 @@ dependencies:
   flutter_riverpod: ^2.6.1
   flutter_svg: ^2.0.17
   gal: ^2.3.3
+  geocoding: ^3.0.0
+  geolocator: ^14.0.3
   go_router: ^17.5.0
   google_fonts: ^8.2.1
   image_picker: ^1.2.3

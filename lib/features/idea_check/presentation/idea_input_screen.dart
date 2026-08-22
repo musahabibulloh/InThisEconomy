@@ -6,6 +6,8 @@ import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../data/idea_check_repository.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class IdeaInputScreen extends StatefulWidget {
   const IdeaInputScreen({super.key});
@@ -23,8 +25,9 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
   double _radiusKm = 2.0;
 
   // Default location (Jakarta center, user should change)
-  final double _latitude = -6.2088;
-  final double _longitude = 106.8456;
+  double _latitude = -6.2088;
+  double _longitude = 106.8456;
+  bool _isLocating = false;
 
   @override
   void dispose() {
@@ -170,12 +173,14 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                         color: AppColors.primary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.my_location_rounded,
-                            color: AppColors.primaryLight, size: 20),
-                        onPressed: _useCurrentLocation,
-                        tooltip: 'Pakai lokasi saat ini',
-                      ),
+                        child: _isLocating 
+                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryLight))
+                           : IconButton(
+                               icon: const Icon(Icons.my_location_rounded,
+                                   color: AppColors.primaryLight, size: 20),
+                               onPressed: _useCurrentLocation,
+                               tooltip: 'Pakai lokasi saat ini',
+                             ),
                     ),
                   ),
                   validator: (value) {
@@ -360,15 +365,71 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
     );
   }
 
-  void _useCurrentLocation() {
-    // In production, use geolocator package to get real GPS coordinates
-    // For now, show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text(
-            'Fitur lokasi GPS akan tersedia setelah setup Google Maps API key'),
-        backgroundColor: AppColors.textPrimary,
-      ),
-    );
+  Future<void> _useCurrentLocation() async {
+    setState(() => _isLocating = true);
+    
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Layanan Lokasi (GPS) tidak aktif.');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Izin akses lokasi ditolak.');
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Izin lokasi ditolak permanen. Silakan ubah di pengaturan HP.');
+      } 
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mengambil koordinat satelit...'), duration: Duration(seconds: 1)),
+      );
+
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
+      );
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+
+      // Reverse geocoding to get city name
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(_latitude, _longitude);
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+          final locationStr = [place.subLocality, place.locality, place.subAdministrativeArea]
+              .where((e) => e != null && e.isNotEmpty)
+              .join(', ');
+          if (locationStr.isNotEmpty) {
+            _locationController.text = locationStr;
+          } else {
+             _locationController.text = 'Lokasi Terdeteksi';
+          }
+        }
+      } catch (e) {
+        _locationController.text = '${_latitude.toStringAsFixed(4)}, ${_longitude.toStringAsFixed(4)}';
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: AppColors.accent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
+      }
+    }
   }
 }
