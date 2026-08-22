@@ -13,6 +13,7 @@ import '../../features/ai_chat/presentation/chat_screen.dart';
 import '../../features/product_photo/presentation/product_studio_screen.dart';
 import '../../features/product_photo/presentation/enhance_photo_screen.dart';
 import '../../features/product_photo/presentation/generate_photo_screen.dart';
+import '../../features/product_photo/presentation/history_screen.dart';
 import '../widgets/main_layout.dart';
 
 class AppRouter {
@@ -137,7 +138,7 @@ class AppRouter {
                   GoRoute(
                     path: 'history',
                     name: 'studioHistory',
-                    builder: (context, state) => const Scaffold(body: Center(child: Text('Riwayat Studio'))),
+                    builder: (context, state) => const HistoryScreen(),
                   ),
                 ]
               ),

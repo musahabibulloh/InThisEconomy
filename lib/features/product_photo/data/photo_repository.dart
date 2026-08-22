@@ -72,4 +72,30 @@ class PhotoRepository {
   String getPublicUrl(String path) {
     return _client.storage.from('product-photos').getPublicUrl(path);
   }
+
+  /// Save base64 image to Supabase Storage and Database History
+  Future<void> saveToHistory(String base64Data) async {
+    try {
+      final userId = _client.auth.currentUser!.id;
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final bytes = base64Decode(base64Data);
+      
+      // Upload to storage
+      final path = '$userId/$fileName';
+      await _client.storage.from('product-photos').uploadBinary(
+        path,
+        bytes,
+        fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+      );
+
+      // Save to DB
+      await _client.from('product_photos').insert({
+        'user_id': userId,
+        'original_path': path,
+        'status': 'done',
+      });
+    } catch (e) {
+      print('Save history error: $e');
+    }
+  }
 }

@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/config/app_colors.dart';
@@ -100,12 +102,14 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                           const SizedBox(height: 8),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              _resultUrl.isNotEmpty ? _resultUrl : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80',
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
+                            child: _resultUrl.startsWith('data:image')
+                                ? Image.memory(base64Decode(_resultUrl.split(',').last), height: 200, width: double.infinity, fit: BoxFit.cover)
+                                : Image.network(
+                                    _resultUrl.isNotEmpty ? _resultUrl : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80',
+                                    height: 200,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ]
                       ),
@@ -131,9 +135,22 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                       child: GradientButton(
                         text: 'Simpan',
                         icon: Icons.check_circle_rounded,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tersimpan di Riwayat Studio!')));
-                          context.pop();
+                        onPressed: () async {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sedang menyimpan...')));
+                          
+                          final base64String = _resultUrl.split(',').last;
+                          final bytes = base64Decode(base64String);
+                          
+                          // Save to gallery
+                          await Gal.putImageBytes(bytes, name: 'AI_Product_${DateTime.now().millisecondsSinceEpoch}');
+                          
+                          // Save to history
+                          await _repo.saveToHistory(base64String);
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri & Riwayat!')));
+                            context.pop();
+                          }
                         },
                       ),
                     ),

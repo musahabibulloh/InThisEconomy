@@ -40,11 +40,32 @@ Fitur ini punya **dua jalur (flow)** tergantung kondisi user:
 
 **Konsistensi dengan Ite.** Karena icon fitur ini sebelumnya digambarkan sebagai "Ite memegang kamera memfoto", pastikan pose itu tetap relevan dipakai sebagai icon menu untuk fitur ini secara keseluruhan (mewakili kedua flow, karena intinya sama-sama soal "menghasilkan foto produk yang bagus"). Kalau ingin membedakan visual kedua flow di dalam fitur, boleh tambah elemen kecil pembeda (misal ikon kamera untuk Flow A, ikon percakapan/pensil untuk Flow B yang berbasis prompt teks) tapi tetap dalam gaya ilustrasi Ite yang sama, jangan icon generik terpisah dari karakter Ite.
 
+## Pipeline teknis Flow A (versi hemat biaya — tanpa API berbayar)
+
+Untuk menekan biaya di tahap awal, Flow A dibangun dengan pipeline 3 langkah berikut, bukan langsung memanggil satu API image-editing berbayar:
+
+**Langkah 1 — Hapus background dari foto asli.**
+Gunakan `rembg` (open-source, self-hosted lewat Docker/HTTP server, gratis tanpa batas) dengan model **rembg-enhance atau BiRefNet** (bukan u2net dasar) karena alpha matting-nya lebih halus di tepi objek — penting untuk produk dengan detail rumit (misal kain, kemasan mengkilap, tekstur berbulu). Hasil langkah ini adalah PNG produk dengan background transparan.
+
+**Langkah 2 — Generate background baru.**
+Gunakan **Cloudflare Workers AI** (model FLUX.1 Schnell atau Stable Diffusion XL, gratis hingga kuota neuron harian) untuk generate gambar background sesuai gaya yang dipilih user (studio, kayu natural, lifestyle, dst — sesuai pilihan visual yang sudah dirancang di UI). Batasi pilihan gaya ke background yang pencahayaannya relatif flat/merata (studio, gradient polos, tekstur natural sederhana) — background dengan pencahayaan dramatis/kompleks (misal sudut matahari sore, banyak sumber cahaya) lebih sulit di-composite secara meyakinkan di langkah berikut.
+
+**Langkah 3 — Gabungkan (composite) objek dengan background baru.**
+Ini langkah paling kritis untuk kualitas hasil akhir — jangan sekadar menempel layer PNG transparan di atas background begitu saja, karena hasilnya akan terlihat "ditempel", bukan "difoto di situ". Tambahkan proses berikut:
+- **Sintesis bayangan (drop shadow):** buat bayangan lembut di bawah objek secara sintetis berdasarkan siluet objek (bukan mengandalkan bayangan asli dari foto sumber, karena arahnya kemungkinan tidak sesuai dengan background baru).
+- **Color/tone matching:** samakan sedikit brightness, saturasi, dan white balance objek dengan tone keseluruhan background, supaya objek tidak terlihat "lebih terang/gelap sendiri" dibanding sekelilingnya.
+- **Edge feathering halus:** beri sedikit blur mikro di tepi objek (1-2px) untuk menghindari garis tepi yang terlalu tajam/patah yang jadi ciri khas hasil cutout-composite amatir.
+- Posisikan objek secara proporsional di frame (tidak terlalu mepet tepi, beri ruang komposisi yang wajar untuk foto produk).
+
+**Fallback ke API berbayar (opsional, untuk kualitas premium).**
+Sediakan opsi di pengaturan/backend untuk beralih ke Gemini API (Nano Banana 2) sebagai pipeline alternatif kalau nanti dibutuhkan kualitas lebih tinggi (terutama untuk background lifestyle kompleks yang sulit di-composite manual) — desain kode supaya provider image-processing ini bisa di-swap tanpa mengubah struktur UI/flow, jadi upgrade di masa depan tidak perlu bongkar ulang fitur.
+
 ## Yang harus dihindari
-- Jangan proses ini disebut/berperilaku sebagai "remove background" (jangan hasilkan background transparan/kosong) — hasil akhirnya harus tetap ada background baru yang terlihat profesional, bukan produk melayang tanpa latar.
+- Jangan proses ini disebut/berperilaku sebagai "remove background" secara final (hasil akhirnya harus tetap ada background baru yang terlihat profesional, bukan produk melayang tanpa latar) — meskipun secara internal langkah 1 pipeline Flow A memang menghapus background sementara, itu hanya tahap antara, bukan hasil akhir yang ditampilkan ke user.
+- Jangan sekadar menempel cutout produk di atas background baru tanpa sintesis bayangan/color matching — hasilnya akan terlihat jelas "ditempel", merusak kesan "profesional" yang jadi inti fitur ini.
 - Jangan menyatukan dua flow ini jadi satu form membingungkan yang mencoba menangani upload foto dan generate dari teks sekaligus di layar yang sama — pisahkan jelas sebagai dua alur/tab/halaman berbeda.
 - Jangan hasil generate langsung menggantikan/menimpa tanpa preview dulu — user harus selalu melihat hasil dan bisa menolak/generate ulang sebelum dipakai final.
-- Jangan lupa menangani kasus produk tidak terdeteksi jelas di foto (misal foto blur/terlalu gelap) — beri feedback yang membantu, bukan diam-diam menghasilkan output buruk.
+- Jangan lupa menangani kasus produk tidak terdeteksi jelas di foto (misal foto blur/terlalu gelap, background terlalu mirip warna produk sehingga cutout gagal rapi) — beri feedback yang membantu, bukan diam-diam menghasilkan output buruk.
 
 ## Detail teknis yang diminta
 1. Pisahkan logic backend/API call untuk Flow A (image-to-image, background enhancement dengan produk asli dipertahankan) dan Flow B (text-to-image generation) karena keduanya butuh pendekatan model AI yang berbeda.
@@ -58,5 +79,9 @@ Fitur ini punya **dua jalur (flow)** tergantung kondisi user:
 3. Baru implementasikan sesuai alur yang sudah dikonfirmasi.
 
 ## Batasan
-- Model/API AI yang dipakai untuk image processing & generation: **Google Gemini API, model Nano Banana 2 (`gemini-3.1-flash-image`)** — dipakai untuk kedua flow: Flow A (image editing, background diganti sementara produk asli dipertahankan) maupun Flow B (text-to-image generation dari prompt user). Gunakan API key/kredensial Google AI yang sama dengan yang dipakai fitur AI Chat Ite, tapi endpoint/model berbeda (model teks untuk chat, model gambar untuk fitur ini).
+- Model/API AI yang dipakai untuk image processing & generation (versi hemat biaya):
+  - **Flow A** (percantik background): pipeline 3 langkah gratis — `rembg`/BiRefNet (self-hosted, background removal) → **Cloudflare Workers AI** (FLUX.1 Schnell/SDXL, generate background baru) → proses compositing custom (shadow synthesis, color matching, edge feathering) di backend.
+  - **Flow B** (generate dari prompt): boleh pakai **Cloudflare Workers AI** (FLUX.1 Schnell) untuk versi gratis, atau **Google Gemini API, model Nano Banana 2 (`gemini-3.1-flash-image`)** untuk kualitas lebih tinggi — pilih sesuai budget tahap ini.
+  - Sediakan fallback opsional ke Gemini API (Nano Banana 2) untuk kedua flow, terutama Flow A ketika hasil compositing manual kurang meyakinkan (background lifestyle kompleks). Desain arsitektur provider image-processing agar mudah di-swap (interface/abstraction terpisah dari logic UI) supaya pindah dari pipeline gratis ke Gemini nanti tidak perlu bongkar ulang fitur.
+  - Kalau fitur chat Ite tetap pakai Gemini API, gunakan API key/kredensial Google AI yang sama untuk fallback Gemini di fitur ini (model teks untuk chat, model gambar untuk fitur ini) — tapi ini terpisah dari pipeline utama Cloudflare Workers AI yang tidak butuh kredensial Google.
 - Hal yang tidak boleh diubah: **[misal: struktur penyimpanan foto produk di database, batas kuota generate per user kalau ada]**
