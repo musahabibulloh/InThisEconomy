@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const FOURSQUARE_API_KEY = Deno.env.get("FOURSQUARE_API_KEY")!
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!
+const SERPAPI_KEY = Deno.env.get("SERPAPI_KEY")!
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,17 +30,20 @@ const CATEGORIES = [
 ]
 
 async function countNearby(type: string, lat: number, lng: number, radiusMeters: number): Promise<number> {
-  const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${radiusMeters}&query=${type}&limit=50`
-  const resp = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Accept": "application/json",
-      "Authorization": FOURSQUARE_API_KEY,
-    }
-  })
-  if (!resp.ok) return 0;
-  const data = await resp.json()
-  return (data.results || []).length
+  // Use a zoom level roughly corresponding to the radius. 14z is good for ~2km
+  const url = `https://serpapi.com/search.json?engine=google_local&q=${encodeURIComponent(type)}&ll=@${lat},${lng},14z&hl=id&gl=id&api_key=${SERPAPI_KEY}`
+
+  try {
+    const resp = await fetch(url)
+    if (!resp.ok) return 0;
+    
+    const data = await resp.json()
+    const places = data.local_results || []
+    return places.length
+  } catch (e) {
+    console.error("Error fetching from SerpApi:", e);
+    return 0;
+  }
 }
 
 async function profileArea(lat: number, lng: number, radiusMeters: number): Promise<Record<string, number>> {
