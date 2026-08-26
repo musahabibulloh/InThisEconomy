@@ -50,4 +50,5 @@ Kalau prompt user menyebut nama brand tertentu (misal "sepatu Adidas", "tas Loui
 
 ## Batasan
 - Model teks yang dipakai untuk enhancement: **[misal: Gemini Flash, atau model teks lain yang sudah dipakai di fitur chat Ite]**
-- Hal yang tidak boleh diubah: **[misal: struktur input prompt di UI, alur generate dan penyimpanan hasil yang sudah ada]**
+- Hal yang tidak 
+boleh diubah: **[misal: struktur input prompt di UI, alur generate dan penyimpanan hasil yang sudah ada]**

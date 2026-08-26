@@ -19,6 +19,8 @@ interface PlaceResult {
   rating: number
   address: string
   place_id: string
+  latitude: number
+  longitude: number
 }
 
 // Search Google Maps via SerpApi for nearby competitors (Much more accurate for Indonesian UMKM)
@@ -40,6 +42,8 @@ async function searchNearbyCompetitors(
       rating: p.rating || 0, // Google Maps rating is already 1-5
       address: p.address || "",
       place_id: p.place_id || "",
+      latitude: p.gps_coordinates?.latitude || 0,
+      longitude: p.gps_coordinates?.longitude || 0,
     }))
   } catch (e) {
     console.error("Error fetching competitors from SerpApi:", e);
