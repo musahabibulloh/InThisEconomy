@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Bear body -->
+  <circle cx="32" cy="36" r="18" fill="#D4A574"/>
+  <!-- Ears -->
+  <circle cx="18" cy="20" r="8" fill="#D4A574"/>
+  <circle cx="46" cy="20" r="8" fill="#D4A574"/>
+  <circle cx="18" cy="20" r="5" fill="#C49460"/>
+  <circle cx="46" cy="20" r="5" fill="#C49460"/>
+  <!-- Face -->
+  <circle cx="32" cy="34" r="16" fill="#E8C9A0"/>
+  <!-- Muzzle -->
+  <ellipse cx="32" cy="38" rx="8" ry="6" fill="#F5DFC0"/>
+  <!-- Nose -->
+  <ellipse cx="32" cy="36" rx="3" ry="2" fill="#6B4226"/>
+  <!-- Eyes - looking up/thinking -->
+  <circle cx="26" cy="31" r="2.5" fill="#6B4226"/>
+  <circle cx="38" cy="31" r="2.5" fill="#6B4226"/>
+  <circle cx="27" cy="30" r="1" fill="white"/>
+  <circle cx="39" cy="30" r="1" fill="white"/>
+  <!-- Eyebrow raised -->
+  <path d="M23 27 Q26 24 29 27" stroke="#6B4226" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Mouth - slight hmm -->
+  <path d="M29 40 Q32 41 35 40" stroke="#6B4226" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Hand on chin -->
+  <ellipse cx="38" cy="44" rx="4" ry="3" fill="#D4A574"/>
+  <!-- Thought bubble dots -->
+  <circle cx="48" cy="18" r="2" fill="#E8961F" opacity="0.6"/>
+  <circle cx="52" cy="13" r="3" fill="#E8961F" opacity="0.5"/>
+  <circle cx="54" cy="7" r="4" fill="#E8961F" opacity="0.4"/>
+  <!-- Celemek/apron hint -->
+  <path d="M24 46 L32 50 L40 46" stroke="#E8961F" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

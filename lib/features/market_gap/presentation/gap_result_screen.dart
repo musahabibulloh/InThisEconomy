@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/market_gap_repository.dart';
 import '../domain/market_gap_model.dart';
 
@@ -49,24 +51,23 @@ class _GapResultScreenState extends State<GapResultScreen> {
         title: const Text('Celah Pasar'),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IteAvatar(pose: ItePose.thinking, size: 64)
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .scale(begin: const Offset(1, 1), end: const Offset(1.08, 1.08), duration: 800.ms),
+                  const SizedBox(height: 16),
+                  Text('Ite lagi pindai area-nya... 🔍', style: TextStyle(color: AppColors.textSecondary)),
+                ],
+              ),
+            )
           : _result == null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off_rounded,
-                          color: AppColors.textMuted, size: 48),
-                      const SizedBox(height: 16),
-                      Text('Data tidak ditemukan',
-                          style: AppTheme.displayFont(
-                              fontSize: 16, color: AppColors.textSecondary)),
-                      const SizedBox(height: 8),
-                      Text('Coba pindai ulang dengan lokasi yang berbeda.',
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                    ],
-                  ),
+              ? MascotEmptyState(
+                  pose: ItePose.support,
+                  title: 'Data tidak ditemukan 😅',
+                  subtitle: 'Coba pindai ulang dengan lokasi yang berbeda ya!',
                 )
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -116,6 +117,18 @@ class _GapResultScreenState extends State<GapResultScreen> {
                           ],
                         ),
                       ).animate().fadeIn(duration: 400.ms),
+
+                      const SizedBox(height: 16),
+
+                      // Ite reaction based on results
+                      MascotReaction(
+                        pose: _result!.gapCategories.isNotEmpty ? ItePose.celebrate : ItePose.support,
+                        message: _result!.gapCategories.isNotEmpty
+                            ? 'Wah, Ite nemu ${_result!.gapCategories.length} kategori yang masih terbuka di sini! Cek satu-satu ya 🎉'
+                            : 'Hmm, area ini udah cukup ramai. Coba perluas radius atau pindah lokasi ya! 💪',
+                        highlighted: _result!.gapCategories.isNotEmpty,
+                      ),
+
                       const SizedBox(height: 20),
                       Text(
                         'Kategori yang Masih Terbuka',
@@ -132,27 +145,10 @@ class _GapResultScreenState extends State<GapResultScreen> {
                       ),
                       const SizedBox(height: 14),
                       if (_result!.gapCategories.isEmpty)
-                        GlassCard(
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Icon(Icons.sentiment_neutral_rounded,
-                                    color: AppColors.textMuted, size: 32),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Tidak ditemukan celah pasar di area ini',
-                                  style: TextStyle(color: AppColors.textPrimary),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Coba perluas radius atau pindah lokasi',
-                                  style: TextStyle(
-                                      color: AppColors.textMuted,
-                                      fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
+                        MascotEmptyState(
+                          pose: ItePose.thinking,
+                          title: 'Belum ketemu celah di area ini',
+                          subtitle: 'Coba perluas radius atau pindah lokasi, siapa tau ada peluang di tempat lain! 🗺️',
                         )
                       else
                         ..._result!.gapCategories

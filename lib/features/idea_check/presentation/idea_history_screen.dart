@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/idea_check_repository.dart';
 import '../domain/idea_check_model.dart';
 
@@ -51,31 +53,18 @@ class _IdeaHistoryScreenState extends State<IdeaHistoryScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _items.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history_rounded,
-                          color: AppColors.textMuted, size: 56),
-                      const SizedBox(height: 16),
-                      Text('Belum ada riwayat',
-                          style: AppTheme.displayFont(
-                              fontSize: 18, color: AppColors.textSecondary)),
-                      const SizedBox(height: 8),
-                      Text(
-                          'Yuk, cek ide bisnismu pertama!',
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                      const SizedBox(height: 24),
-                      TextButton.icon(
-                        onPressed: () => context.push('/idea-check'),
-                        icon: Icon(Icons.add_rounded, color: AppColors.primary),
-                        label: Text('Cek Ide Sekarang',
-                            style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600)),
-                      ),
-                    ],
+              ? MascotEmptyState(
+                  pose: ItePose.idea,
+                  title: 'Belum ada riwayat nih 📋',
+                  subtitle:
+                      'Yuk, cek ide bisnismu yang pertama! Ite udah siap bantuin riset pasar buat kamu 🚀',
+                  action: TextButton.icon(
+                    onPressed: () => context.push('/idea-check'),
+                    icon: Icon(Icons.add_rounded, color: AppColors.primary),
+                    label: Text('Cek Ide Sekarang',
+                        style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600)),
                   ),
                 )
               : ListView.builder(

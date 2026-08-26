@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gal/gal.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/photo_repository.dart';
 
 class GeneratePhotoScreen extends StatefulWidget {
@@ -45,11 +48,36 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_hasResult) ...[
-                Text('Hasil Visual', style: AppTheme.displayFont(fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                const Text('AI telah membuatkan visual produk berdasarkan idemu.', style: TextStyle(color: AppColors.textSecondary)),
-                const SizedBox(height: 24),
+              if (_isProcessing) ...[
+                // Ite working animation
+                Center(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 60),
+                      IteAvatar(pose: ItePose.thinking, size: 80)
+                          .animate(onPlay: (c) => c.repeat(reverse: true))
+                          .scale(begin: const Offset(1, 1), end: const Offset(1.08, 1.08), duration: 800.ms),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Ite lagi gambar buat kamu... 🎨',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tunggu sebentar ya, sedang proses kreatif!',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else if (_hasResult) ...[
+                // Ite celebrates
+                const MascotReaction(
+                  pose: ItePose.celebrate,
+                  message: 'Tadaaa! 🎉 Visual produkmu udah jadi! Gimana, keren kan?',
+                  highlighted: true,
+                ),
+                const SizedBox(height: 16),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: _resultUrl.startsWith('data:image')
@@ -78,10 +106,10 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: GradientButton(
-                        text: 'Simpan',
+                        text: 'Simpan 💾',
                         icon: Icons.check_circle_rounded,
                         onPressed: () async {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sedang menyimpan...')));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ite lagi nyimpen foto kamu... 📸')));
                           
                           final base64String = _resultUrl.split(',').last;
                           final bytes = base64Decode(base64String);
@@ -93,7 +121,7 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
                           await _repo.saveToHistory(base64String);
 
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri & Riwayat!')));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri & Riwayat! 🎉')));
                             context.pop();
                           }
                         },
@@ -107,7 +135,13 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Gambarkan produk impianmu...', style: AppTheme.displayFont(fontSize: 16, fontWeight: FontWeight.w700)),
+                      Row(
+                        children: [
+                          const IteAvatar(pose: ItePose.camera, size: 28, showEntrance: false),
+                          const SizedBox(width: 8),
+                          Text('Gambarkan produk impianmu...', style: AppTheme.displayFont(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _promptController,
@@ -133,17 +167,17 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
                   runSpacing: 8,
                   children: [
                     ActionChip(
-                      label: const Text('Kopi Kekinian'),
+                      label: const Text('☕ Kopi Kekinian'),
                       onPressed: () => _setTemplate('Gelas kopi es kopi susu gula aren dengan embun dingin, di atas meja kafe kayu, blur background.'),
                       backgroundColor: AppColors.glassWhite(),
                     ),
                     ActionChip(
-                      label: const Text('Fashion Baju'),
+                      label: const Text('👕 Fashion Baju'),
                       onPressed: () => _setTemplate('Kaos katun premium warna sage green terlipat rapi di atas meja minimalis, estetik, pencahayaan studio cerah.'),
                       backgroundColor: AppColors.glassWhite(),
                     ),
                     ActionChip(
-                      label: const Text('Kosmetik'),
+                      label: const Text('💄 Kosmetik'),
                       onPressed: () => _setTemplate('Botol serum kaca elegan dengan tetesan air, dikelilingi daun mint dan background pastel lembut.'),
                       backgroundColor: AppColors.glassWhite(),
                     ),
@@ -151,11 +185,16 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
                 ),
                 const SizedBox(height: 40),
                 GradientButton(
-                  text: 'Mulai Buat Foto',
+                  text: 'Mulai Buat Foto 🎨',
                   icon: Icons.auto_awesome_rounded,
                   isLoading: _isProcessing,
                   onPressed: () async {
-                    if (_promptController.text.isEmpty) return;
+                    if (_promptController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Tulis deskripsi produkmu dulu ya 😊')),
+                      );
+                      return;
+                    }
                     setState(() => _isProcessing = true);
                     
                     try {
@@ -168,7 +207,7 @@ class _GeneratePhotoScreenState extends State<GeneratePhotoScreen> {
                       }
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Waduh gagal 😅 ${e.toString()}')));
                       }
                     } finally {
                       if (mounted) {

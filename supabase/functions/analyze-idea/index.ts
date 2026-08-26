@@ -21,30 +21,30 @@ interface PlaceResult {
   place_id: string
 }
 
-// Search Foursquare Places API for nearby competitors
+// Search Google Maps via SerpApi for nearby competitors (Much more accurate for Indonesian UMKM)
 async function searchNearbyCompetitors(
   category: string, lat: number, lng: number, radiusMeters: number
 ): Promise<PlaceResult[]> {
-  const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${radiusMeters}&query=${category}&limit=20`
+  // Use a zoom level roughly corresponding to the radius. 14z is good for ~2km
+  const url = `https://serpapi.com/search.json?engine=google_local&q=${encodeURIComponent(category)}&ll=@${lat},${lng},14z&hl=id&gl=id&api_key=${SERPAPI_KEY}`
 
-  const resp = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Accept": "application/json",
-      "Authorization": FOURSQUARE_API_KEY,
-    }
-  })
+  try {
+    const resp = await fetch(url)
+    if (!resp.ok) return [];
+    
+    const data = await resp.json()
+    const places = data.local_results || []
 
-  if (!resp.ok) return [];
-  const data = await resp.json()
-  const places = data.results || []
-
-  return places.map((p: any) => ({
-    name: p.name || "Unknown",
-    rating: (p.rating || 0) / 2, // Foursquare rating is 1-10, scale to 1-5
-    address: p.location?.formatted_address || p.location?.address || "",
-    place_id: p.fsq_id || "",
-  }))
+    return places.slice(0, 20).map((p: any) => ({
+      name: p.title || "Unknown",
+      rating: p.rating || 0, // Google Maps rating is already 1-5
+      address: p.address || "",
+      place_id: p.place_id || "",
+    }))
+  } catch (e) {
+    console.error("Error fetching competitors from SerpApi:", e);
+    return [];
+  }
 }
 
 // Search nearby area types (for target market profiling)

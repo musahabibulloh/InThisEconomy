@@ -5,6 +5,7 @@ import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../data/auth_repository.dart';
 
@@ -57,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login gagal: ${e.toString()}'),
+            content: Text('Waduh, gagal masuk 😅 ${e.toString()}'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -80,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Title
+              // Title — playful
               Center(
                 child: Text(
                   'In This Economy.',
@@ -95,26 +96,58 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 4),
               Center(
                 child: Text(
-                  'Log in to your business :)',
+                  'Yuk masuk, ide bisnis seru udah nungguin kamu! 🚀',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
-                        fontSize: 16,
+                        fontSize: 14,
                       ),
                 ),
               ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
 
               const SizedBox(height: 32),
 
-              // Bear Avatar
+              // Ite Mascot — reacts to password focus
               Center(
-                child: Image.asset(
-                  'assets/icons/bear_login.webp',
-                  width: 160,
-                  height: 160,
-                  fit: BoxFit.contain,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeOutBack,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+                  child: _isPasswordFocused
+                      ? IteAvatar(
+                          key: const ValueKey('hide'),
+                          pose: ItePose.hide,
+                          size: 120,
+                          showEntrance: false,
+                        )
+                      : Image.asset(
+                          key: const ValueKey('bear'),
+                          'assets/icons/bear_login.webp',
+                          width: 160,
+                          height: 160,
+                          fit: BoxFit.contain,
+                        ),
                 ),
               ).animate().fadeIn(delay: 400.ms, duration: 600.ms),
+
+              // Ite speech below avatar
+              if (_isPasswordFocused)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Ite gak ngintip kok! 🙈',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ).animate().fadeIn(duration: 300.ms),
 
               const SizedBox(height: 32),
 
@@ -151,10 +184,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Email wajib diisi';
+                          return 'Isi emailmu dulu ya 😊';
                         }
                         if (!value.contains('@')) {
-                          return 'Format email tidak valid';
+                          return 'Hmm, format emailnya kurang tepat nih';
                         }
                         return null;
                       },
@@ -200,17 +233,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Password wajib diisi';
+                          return 'Password wajib diisi ya';
                         }
                         if (value.length < 6) {
-                          return 'Minimal 6 karakter';
+                          return 'Minimal 6 karakter biar aman 🔒';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 24),
 
-                    // Login button
+                    // Login button — playful text
                     Container(
                       height: 52,
                       decoration: BoxDecoration(
@@ -243,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               )
                             : const Text(
-                                'LOGIN DENGAN EMAIL',
+                                'MASUK YUK! 🐻',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,

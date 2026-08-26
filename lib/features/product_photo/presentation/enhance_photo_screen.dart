@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/photo_repository.dart';
 
 class EnhancePhotoScreen extends StatefulWidget {
@@ -46,15 +49,40 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_image == null) ...[
+              if (_isProcessing) ...[
+                // Ite working animation
+                Center(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 60),
+                      IteAvatar(pose: ItePose.camera, size: 80)
+                          .animate(onPlay: (c) => c.repeat(reverse: true))
+                          .scale(begin: const Offset(1, 1), end: const Offset(1.08, 1.08), duration: 800.ms),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Ite lagi percantik fotomu... ✨',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Sabar ya, lagi dipoles jadi sekelas studio 📸',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else if (_image == null) ...[
+                // Empty state with Ite
                 GlassCard(
                   padding: const EdgeInsets.all(40),
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(Icons.photo_camera_outlined, size: 64, color: AppColors.textMuted),
+                        const IteAvatar(pose: ItePose.camera, size: 64),
                         const SizedBox(height: 16),
-                        const Text('Belum ada foto terpilih', style: TextStyle(color: AppColors.textSecondary)),
+                        const Text('Ayo, foto produkmu! Ite bantuin percantik 📸',
+                            style: TextStyle(color: AppColors.textSecondary),
+                            textAlign: TextAlign.center),
                         const SizedBox(height: 24),
                         Row(
                           children: [
@@ -68,8 +96,13 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                   ),
                 ),
               ] else if (_hasResult) ...[
-                Text('Hasil Percantik Latar', style: AppTheme.displayFont(fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 24),
+                // Ite celebrates the result
+                const MascotReaction(
+                  pose: ItePose.celebrate,
+                  message: 'Wah, hasilnya keren banget! 🤩 Foto produkmu udah sekelas katalog profesional!',
+                  highlighted: true,
+                ),
+                const SizedBox(height: 16),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -133,10 +166,10 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: GradientButton(
-                        text: 'Simpan',
+                        text: 'Simpan 💾',
                         icon: Icons.check_circle_rounded,
                         onPressed: () async {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sedang menyimpan...')));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ite lagi nyimpen foto kamu... 📸')));
                           
                           final base64String = _resultUrl.split(',').last;
                           final bytes = base64Decode(base64String);
@@ -148,7 +181,7 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                           await _repo.saveToHistory(base64String);
 
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri & Riwayat!')));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri & Riwayat! 🎉')));
                             context.pop();
                           }
                         },
@@ -216,7 +249,7 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                 ),
                 const SizedBox(height: 32),
                 GradientButton(
-                  text: 'Percantik Sekarang',
+                  text: 'Percantik Sekarang ✨',
                   icon: Icons.auto_fix_high_rounded,
                   isLoading: _isProcessing,
                   onPressed: () async {
@@ -231,7 +264,7 @@ class _EnhancePhotoScreenState extends State<EnhancePhotoScreen> {
                       }
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Waduh gagal 😅 ${e.toString()}')));
                       }
                     } finally {
                       if (mounted) {

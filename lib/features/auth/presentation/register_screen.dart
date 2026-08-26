@@ -5,6 +5,7 @@ import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../data/auth_repository.dart';
 
@@ -49,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
-                'Registrasi berhasil! Anda telah masuk.'),
+                'Selamat datang di keluarga ITE! 🎉 Kamu sudah masuk.'),
             backgroundColor: AppColors.scoreHigh,
           ),
         );
@@ -59,7 +60,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registrasi gagal: ${e.toString()}'),
+            content: Text('Waduh, gagal daftar 😅 ${e.toString()}'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -85,30 +86,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
+              // Ite waving
               Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.glassWhite(0.6),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.glassBorder(0.8), width: 1.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.glassShadow(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: SvgPicture.asset('assets/icons/ite_greet.svg'),
+                child: IteAvatar(
+                  pose: ItePose.greet,
+                  size: 80,
                 ),
               ).animate().fadeIn(duration: 600.ms).scale(begin: const Offset(0.8, 0.8)),
               const SizedBox(height: 16),
               Center(
                 child: Text(
-                  'Gabung ITE',
+                  'Gabung bareng Ite! 🐻',
                   style: AppTheme.displayFont(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
@@ -119,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  'Mulai kelola usahamu dengan pintar hari ini.',
+                  'Satu langkah lagi sebelum jadi pengusaha data-driven 💪',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
@@ -140,13 +128,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        hintText: 'Nama kamu',
+                        hintText: 'Siapa nama kamu? 😊',
                         prefixIcon: Icon(Icons.person_outline_rounded,
                             color: AppColors.textMuted),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Nama wajib diisi';
+                          return 'Kenalan dulu dong, nama kamu siapa? 😄';
                         }
                         return null;
                       },
@@ -164,10 +152,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Email wajib diisi';
+                          return 'Isi emailmu dulu ya';
                         }
                         if (!value.contains('@')) {
-                          return 'Format email tidak valid';
+                          return 'Hmm, format emailnya kurang tepat nih';
                         }
                         return null;
                       },
@@ -179,7 +167,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        hintText: 'Minimal 6 karakter',
+                        hintText: 'Minimal 6 karakter ya 🔒',
                         prefixIcon: const Icon(Icons.lock_outline_rounded,
                             color: AppColors.textMuted),
                         suffixIcon: IconButton(
@@ -195,9 +183,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Password wajib diisi';
+                          return 'Password wajib diisi ya';
                         }
-                        if (value.length < 6) return 'Minimal 6 karakter';
+                        if (value.length < 6) return 'Minimal 6 karakter biar aman 🔒';
                         return null;
                       },
                     ),
@@ -208,7 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _confirmController,
                       obscureText: _obscureConfirm,
                       decoration: InputDecoration(
-                        hintText: 'Ulangi password',
+                        hintText: 'Ketik ulang biar pasti sama',
                         prefixIcon: const Icon(Icons.lock_outline_rounded,
                             color: AppColors.textMuted),
                         suffixIcon: IconButton(
@@ -224,14 +212,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value != _passwordController.text) {
-                          return 'Password tidak cocok';
+                          return 'Oops, passwordnya gak cocok nih 😅';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 32),
                     GradientButton(
-                      text: 'Buat Akun Sekarang',
+                      text: 'Daftar & Mulai Petualangan! 🚀',
                       onPressed: _handleRegister,
                       isLoading: _isLoading,
                       icon: Icons.person_add_outlined,

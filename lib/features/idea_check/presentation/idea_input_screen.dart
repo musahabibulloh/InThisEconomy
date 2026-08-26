@@ -5,6 +5,8 @@ import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/idea_check_repository.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -56,7 +58,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal menganalisis: ${e.toString()}'),
+            content: Text('Waduh, gagal menganalisis 😅 ${e.toString()}'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -86,42 +88,13 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
               children: [
                 const SizedBox(height: 12),
 
-                // Info card
-                GlassCard(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.1),
-                      AppColors.primary.withValues(alpha: 0.03),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.info_outline_rounded,
-                          color: AppColors.primaryLight,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'Ceritakan ide bisnismu dan pilih lokasi. Kami cek kompetitor, tren, dan peluangmu di sana.',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ).animate().fadeIn(duration: 400.ms),
+                // Ite speech bubble — replaces generic info card
+                const MascotReaction(
+                  pose: ItePose.idea,
+                  message:
+                      'Ceritain aja ide bisnismu, nanti aku bantu cek kompetitor dan peluangnya di sekitar lokasi pilihanmu! 😊',
+                  highlighted: true,
+                ),
 
                 const SizedBox(height: 24),
 
@@ -144,7 +117,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Tulis ide bisnismu dulu, ya';
+                      return 'Tulis ide bisnismu dulu ya 😊';
                     }
                     if (value.length < 5) {
                       return 'Coba jelaskan lebih detail biar hasilnya lebih akurat';
@@ -185,7 +158,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Isi lokasi supaya kami bisa cek kompetitor di sekitarnya';
+                      return 'Isi lokasi supaya Ite bisa cek kompetitor di sekitarnya 📍';
                     }
                     return null;
                   },
@@ -296,41 +269,18 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
 
                 const SizedBox(height: 28),
 
-                // Disclaimer — honest, not scary
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.textMuted.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.textMuted.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.info_outline_rounded,
-                          color: AppColors.textMuted, size: 16),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Hasil berdasarkan data Google Maps & tren pencarian. UMKM rumahan yang hanya online mungkin belum tercakup — jadikan ini panduan, bukan jaminan.',
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 11,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ).animate().fadeIn(delay: 350.ms, duration: 400.ms),
+                // Disclaimer — Ite whispers playfully
+                const MascotSpeech(
+                  pose: ItePose.thinking,
+                  message:
+                      'Psst... ini perkiraan berdasarkan data Google Maps & tren pencarian ya. UMKM rumahan yang online aja mungkin belum tercakup — jadikan panduan, bukan jaminan! 😉',
+                ),
 
                 const SizedBox(height: 24),
 
                 // Analyze button
                 GradientButton(
-                  text: 'Cek Peluang di Sini',
+                  text: 'Yuk Cek Peluangnya! 🚀',
                   onPressed: _handleAnalyze,
                   isLoading: _isLoading,
                   icon: Icons.auto_awesome_rounded,
@@ -387,7 +337,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
       } 
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mengambil koordinat satelit...'), duration: Duration(seconds: 1)),
+        const SnackBar(content: Text('Ite lagi cari lokasimu lewat satelit... 📡'), duration: Duration(seconds: 1)),
       );
 
       Position position = await Geolocator.getCurrentPosition(

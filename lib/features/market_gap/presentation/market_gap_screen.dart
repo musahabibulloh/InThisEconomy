@@ -4,7 +4,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/market_gap_repository.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class MarketGapScreen extends StatefulWidget {
   const MarketGapScreen({super.key});
@@ -18,8 +22,9 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
   final _repo = MarketGapRepository();
   bool _isLoading = false;
   double _radiusKm = 2.0;
-  final double _latitude = -6.2088;
-  final double _longitude = 106.8456;
+  double _latitude = -6.2088;
+  double _longitude = 106.8456;
+  bool _isLocating = false;
 
   @override
   void dispose() {
@@ -42,7 +47,7 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal memindai: $e'),
+            content: Text('Waduh, gagal memindai 😅 $e'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -84,38 +89,15 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                 const SizedBox(height: 12),
-                GlassCard(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.secondary.withValues(alpha: 0.1),
-                      AppColors.secondary.withValues(alpha: 0.03),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.explore_outlined,
-                            color: AppColors.secondaryLight, size: 20),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'Belum punya ide? Masukkan lokasi dan kami carikan kategori bisnis yang belum ada atau masih sedikit di sana.',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ).animate().fadeIn(duration: 400.ms),
+
+                // Ite explains the feature
+                const MascotReaction(
+                  pose: ItePose.market,
+                  message:
+                      'Belum punya ide? Gapapa! Ite pindai dulu area ini, siapa tau ada kategori bisnis yang belum digarap di sana 🔍',
+                  highlighted: true,
+                ),
+
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -130,15 +112,57 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _locationController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Contoh: Jl. Malioboro, Yogyakarta',
                     prefixIcon:
-                        Icon(Icons.search_rounded, color: AppColors.textMuted),
+                        const Icon(Icons.search_rounded, color: AppColors.textMuted),
+                    suffixIcon: Container(
+                      margin: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: _isLocating
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.secondaryLight))
+                          : IconButton(
+                              icon: const Icon(Icons.my_location_rounded,
+                                  color: AppColors.secondaryLight, size: 20),
+                              onPressed: _useCurrentLocation,
+                              tooltip: 'Pakai lokasi saat ini',
+                            ),
+                    ),
                   ),
                   validator: (v) => v == null || v.isEmpty
-                      ? 'Isi lokasi dulu supaya kami bisa memindai area-nya'
+                      ? 'Isi lokasi dulu supaya Ite bisa memindai area-nya 📍'
                       : null,
                 ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+                const SizedBox(height: 8),
+
+                // Coordinate display
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLightElevated,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.textMuted.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.pin_drop_outlined,
+                          color: AppColors.textMuted, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Koordinat: ${_latitude.toStringAsFixed(4)}, ${_longitude.toStringAsFixed(4)}',
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ).animate().fadeIn(delay: 150.ms, duration: 400.ms),
+
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -170,36 +194,17 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
                   ),
                 ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.textMuted.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: AppColors.textMuted.withValues(alpha: 0.1)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.info_outline_rounded,
-                          color: AppColors.textMuted, size: 16),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Minim pesaing belum tentu peluang bagus — bisa juga karena belum ada permintaan. Hasil ini indikasi, bukan jaminan.',
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 11,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+
+                // Disclaimer as Ite speech
+                const MascotSpeech(
+                  pose: ItePose.thinking,
+                  message:
+                      'Minim pesaing belum tentu peluang bagus — bisa juga karena belum ada permintaan. Hasil ini indikasi, bukan jaminan ya! 😉',
+                ),
+
                 const SizedBox(height: 28),
                 GradientButton(
-                  text: 'Pindai Celah di Sini',
+                  text: 'Pindai Celah di Sini 🔍',
                   onPressed: _handleScan,
                   isLoading: _isLoading,
                   icon: Icons.explore_rounded,
@@ -213,5 +218,73 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _useCurrentLocation() async {
+    setState(() => _isLocating = true);
+    
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Layanan Lokasi (GPS) tidak aktif.');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Izin akses lokasi ditolak.');
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Izin lokasi ditolak permanen. Silakan ubah di pengaturan HP.');
+      } 
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ite lagi cari lokasimu lewat satelit... 📡'), duration: Duration(seconds: 1)),
+      );
+
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
+      );
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+
+      // Reverse geocoding to get city name
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(_latitude, _longitude);
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+          final locationStr = [place.subLocality, place.locality, place.subAdministrativeArea]
+              .where((e) => e != null && e.isNotEmpty)
+              .join(', ');
+          if (locationStr.isNotEmpty) {
+            _locationController.text = locationStr;
+          } else {
+             _locationController.text = 'Lokasi Terdeteksi';
+          }
+        }
+      } catch (e) {
+        _locationController.text = '${_latitude.toStringAsFixed(4)}, ${_longitude.toStringAsFixed(4)}';
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: AppColors.accent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
+      }
+    }
   }
 }

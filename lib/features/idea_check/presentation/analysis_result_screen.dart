@@ -5,6 +5,8 @@ import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/market_meter.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/idea_check_repository.dart';
 import '../domain/idea_check_model.dart';
 
@@ -70,23 +72,8 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.35),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.auto_awesome_rounded,
-                color: Colors.white, size: 36),
-          )
+          // Ite thinking animation instead of generic spinner
+          IteAvatar(pose: ItePose.thinking, size: 80)
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scale(
                 begin: const Offset(1, 1),
@@ -95,13 +82,13 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
               ),
           const SizedBox(height: 24),
           Text(
-            'Menganalisis ide bisnismu...',
+            'Ite lagi riset buat kamu... 🔍',
             style: TextStyle(
-                color: AppColors.textSecondary, fontSize: 16),
+                color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
-            'Memeriksa kompetitor, tren, dan peluang pasar',
+            'Ngecek kompetitor, tren, dan peluang pasar',
             style: TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ],
@@ -110,42 +97,22 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
   }
 
   Widget _buildError() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline_rounded,
-                color: AppColors.accent, size: 48),
-            const SizedBox(height: 16),
-            Text('Gagal memuat hasil',
-                style: AppTheme.displayFont(fontSize: 18)),
-            const SizedBox(height: 8),
-            Text(
-              _error ?? '',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coba periksa koneksi internetmu dan coba lagi.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isLoading = true;
-                  _error = null;
-                });
-                _loadResult();
-              },
-              child: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
+    return MascotEmptyState(
+      pose: ItePose.support,
+      title: 'Waduh, ada gangguan 😅',
+      subtitle: _error != null
+          ? '$_error\n\nCoba cek koneksi internetmu dan tekan tombol di bawah ya!'
+          : 'Coba periksa koneksi internetmu dan coba lagi.',
+      action: ElevatedButton.icon(
+        onPressed: () {
+          setState(() {
+            _isLoading = true;
+            _error = null;
+          });
+          _loadResult();
+        },
+        icon: const Icon(Icons.refresh_rounded),
+        label: const Text('Coba Lagi'),
       ),
     );
   }
@@ -203,7 +170,14 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
             ),
           ).animate().fadeIn(duration: 400.ms),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          // ── Mascot Reaction Strip — Ite reacts to opportunity score! ──
+          MascotReaction.forScore(r.opportunityScore ?? 'sedang')
+              .animate()
+              .fadeIn(delay: 100.ms, duration: 500.ms),
+
+          const SizedBox(height: 16),
 
           // ── Market Meters (signature element!) ──
           GlassCard(
@@ -234,38 +208,35 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
                 ],
               ),
             ),
-          ).animate().fadeIn(delay: 150.ms, duration: 500.ms),
+          ).animate().fadeIn(delay: 200.ms, duration: 500.ms),
 
           const SizedBox(height: 16),
 
-          // ── Recommendation (most actionable — shown first!) ──
+          // ── Recommendation (Ite's advice — most actionable!) ──
           if (r.recommendation != null)
-            _buildSection(
-              'Yang Bisa Kamu Lakukan',
-              Icons.tips_and_updates_outlined,
+            _buildIteAdvice(
+              'Saran dari Ite 💡',
               r.recommendation!,
-              color: AppColors.secondary,
-              isHighlighted: true,
-            ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+            ).animate().fadeIn(delay: 350.ms, duration: 400.ms),
 
           _buildSection(
             'Seberapa Ramai Persaingan',
             Icons.groups_outlined,
             r.targetMarket['description'] ?? 'Data tidak tersedia',
-          ).animate().fadeIn(delay: 380.ms, duration: 400.ms),
+          ).animate().fadeIn(delay: 420.ms, duration: 400.ms),
 
           _buildSection(
             'Peluang Beda dari yang Lain',
             Icons.star_outline_rounded,
             r.differentiationAnalysis ?? 'Data tidak tersedia',
-          ).animate().fadeIn(delay: 440.ms, duration: 400.ms),
+          ).animate().fadeIn(delay: 480.ms, duration: 400.ms),
 
           _buildSection(
             'Risiko Tren Pasar',
             Icons.warning_amber_rounded,
             r.trendRisk ?? 'Data tidak tersedia',
             color: AppColors.scoreMedium,
-          ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+          ).animate().fadeIn(delay: 540.ms, duration: 400.ms),
 
           // ── Competitors ──
           if (r.competitors.isNotEmpty) ...[
@@ -298,7 +269,7 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
                     _showAllCompetitors(r.competitors);
                   },
                   child: Text(
-                    'Lihat ${r.competitors.length - 5} kompetitor lainnya',
+                    'Lihat ${r.competitors.length - 5} kompetitor lainnya 👀',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -309,39 +280,61 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
               ),
           ],
 
-          // ── Disclaimer ──
+          // ── Disclaimer — Ite whispers ──
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.textMuted.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.textMuted.withValues(alpha: 0.1),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const MascotSpeech(
+            pose: ItePose.thinking,
+            message:
+                'Ini perkiraan berdasarkan data Google Maps & tren pencarian ya. UMKM rumahan yang online aja mungkin belum tercakup. Jadikan panduan, bukan patokan mutlak! 😉',
+          ),
+
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  /// Special "Ite's Advice" card — highlighted with mascot
+  Widget _buildIteAdvice(String title, String content) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: GlassCard(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.secondary.withValues(alpha: 0.1),
+            AppColors.secondary.withValues(alpha: 0.03),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                const Icon(Icons.info_outline_rounded,
-                    color: AppColors.textMuted, size: 16),
-                const SizedBox(width: 10),
+                const IteAvatar(pose: ItePose.celebrate, size: 28, showEntrance: false),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Ini perkiraan berdasarkan data Google Maps & tren pencarian. UMKM rumahan yang hanya jualan online mungkin belum tercakup. Jadikan panduan, bukan patokan mutlak.',
+                    title,
                     style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
-                      height: 1.5,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: AppColors.secondary,
                     ),
                   ),
                 ),
               ],
             ),
-          ).animate().fadeIn(delay: 600.ms, duration: 400.ms),
-
-          const SizedBox(height: 40),
-        ],
+            const SizedBox(height: 10),
+            Text(
+              content,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

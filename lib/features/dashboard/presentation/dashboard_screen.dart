@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../../auth/data/auth_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -18,10 +19,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final _authRepo = AuthRepository();
   String _userName = '';
 
+  // Rotating playful greetings
+  static const _greetings = [
+    'Hari ini mau riset apa nih? 🔍',
+    'Yuk cek peluang baru bareng Ite! 🐻',
+    'Siap validasi ide bisnis hari ini? 💡',
+    'Ada ide seru? Ite bantu cek! 🚀',
+  ];
+
+  late String _greeting;
+
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _greeting = _greetings[DateTime.now().minute % _greetings.length];
   }
 
   Future<void> _loadProfile() async {
@@ -52,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const SizedBox(height: 20),
 
-              // ── Header ──
+              // ── Header with Ite ──
               Row(
                 children: [
                   Expanded(
@@ -69,16 +81,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            SvgPicture.asset(
-                              'assets/icons/ite_greet.svg',
-                              width: 26,
-                              height: 26,
+                            const IteAvatar(
+                              pose: ItePose.greet,
+                              size: 30,
+                              showEntrance: false,
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Mau validasi ide bisnis apa hari ini?',
+                          _greeting,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: AppColors.textSecondary,
@@ -124,7 +136,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // ── Fitur Aplikasi ──
               Text(
-                'Fitur Aplikasi',
+                'Mau ngapain hari ini?',
                 style: AppTheme.displayFont(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -140,6 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: _ModuleCard(
                       title: 'Cek Ide Bisnis',
                       subtitle: 'Validasi ide dengan data pasar',
+                      pose: ItePose.idea,
                       onTap: () => context.push('/idea-check'),
                     ),
                   ),
@@ -147,7 +160,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Expanded(
                     child: _ModuleCard(
                       title: 'Cari Celah Pasar',
-                      subtitle: 'Temukan peluang bisnis',
+                      subtitle: 'Temukan peluang bisnis baru',
+                      pose: ItePose.market,
                       onTap: () => context.push('/market-gap'),
                     ),
                   ),
@@ -161,15 +175,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Expanded(
                     child: _ModuleCard(
                       title: 'Konsultasi AI',
-                      subtitle: 'Tanya AI tentang ide bisnismu',
+                      subtitle: 'Curhat bisnis sama Ite',
+                      pose: ItePose.chat,
                       onTap: () => context.push('/ai-chat'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _ModuleCard(
-                      title: 'Produk',
-                      subtitle: 'Perbagus foto produk anda',
+                      title: 'Studio Foto',
+                      subtitle: 'Percantik foto produkmu',
+                      pose: ItePose.camera,
                       onTap: () => context.push('/product-photo'),
                     ),
                   ),
@@ -208,7 +224,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            'Lihat semua hasil cek ide bisnismu',
+                            'Intip lagi hasil cek ide bisnismu',
                             style: TextStyle(
                               color: AppColors.textMuted,
                               fontSize: 12,
@@ -322,15 +338,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-/// Compact square card for modules in 2-column layout.
+/// Module card with Ite mascot icon for each feature.
 class _ModuleCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final ItePose pose;
   final VoidCallback onTap;
 
   const _ModuleCard({
     required this.title,
     required this.subtitle,
+    required this.pose,
     required this.onTap,
   });
 
@@ -342,6 +360,8 @@ class _ModuleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          IteAvatar(pose: pose, size: 36, showEntrance: false),
+          const SizedBox(height: 10),
           Text(
             title,
             style: const TextStyle(

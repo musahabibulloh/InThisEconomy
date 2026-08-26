@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:gal/gal.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
+import '../../../core/widgets/mascot_reaction.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/photo_repository.dart';
 import '../domain/photo_model.dart';
 
@@ -34,17 +36,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _downloadImage(String url) async {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mengunduh gambar...')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ite lagi unduh gambarnya... 📥')));
       final request = await HttpClient().getUrl(Uri.parse(url));
       final response = await request.close();
       final bytes = await consolidateHttpClientResponseBytes(response);
       await Gal.putImageBytes(bytes, name: 'AI_Product_${DateTime.now().millisecondsSinceEpoch}');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri!')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil disimpan ke Galeri! 🎉')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Waduh gagal 😅 $e')));
       }
     }
   }
@@ -89,17 +91,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
             final photos = snapshot.data ?? [];
             if (photos.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.photo_library_outlined, size: 64, color: AppColors.textMuted),
-                    const SizedBox(height: 16),
-                    Text('Belum ada foto', style: AppTheme.displayFont(fontSize: 20)),
-                    const SizedBox(height: 8),
-                    const Text('Foto yang Anda simpan akan muncul di sini', style: TextStyle(color: AppColors.textSecondary)),
-                  ],
-                ),
+              return MascotEmptyState(
+                pose: ItePose.camera,
+                title: 'Belum ada foto nih 📷',
+                subtitle: 'Foto yang kamu simpan dari Studio AI akan muncul di sini. Yuk mulai bikin!',
               );
             }
 

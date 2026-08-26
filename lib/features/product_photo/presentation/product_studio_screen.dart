@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/ite_avatar.dart';
 
 class ProductStudioScreen extends StatelessWidget {
   const ProductStudioScreen({super.key});
@@ -31,16 +32,7 @@ class ProductStudioScreen extends StatelessWidget {
               // Header & Ite Mascot
               Row(
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: SvgPicture.asset('assets/icons/ite_camera.svg'),
-                  ),
+                  const IteAvatar(pose: ItePose.camera, size: 60),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -55,7 +47,7 @@ class ProductStudioScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Bikin visual produk memukau tanpa alat mahal.',
+                          'Bikin visual produk memukau tanpa alat mahal 📸',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 14,
@@ -98,7 +90,7 @@ class ProductStudioScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 6),
                             const Text(
-                              'Punya foto asli? Mari ganti latarnya jadi sekelas studio profesional.',
+                              'Punya foto asli? Ite bantuin ganti latarnya jadi sekelas studio profesional!',
                               style: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 13,
@@ -145,7 +137,7 @@ class ProductStudioScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 6),
                             const Text(
-                              'Belum ada foto? Tulis idemu dan biarkan AI merancang visualnya.',
+                              'Belum ada foto? Tulis aja idemu dan biarkan AI Ite yang rancangin visualnya',
                               style: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 13,

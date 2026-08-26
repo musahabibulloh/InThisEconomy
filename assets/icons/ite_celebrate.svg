@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Bear body -->
+  <circle cx="32" cy="36" r="18" fill="#D4A574"/>
+  <!-- Ears -->
+  <circle cx="18" cy="20" r="8" fill="#D4A574"/>
+  <circle cx="46" cy="20" r="8" fill="#D4A574"/>
+  <circle cx="18" cy="20" r="5" fill="#C49460"/>
+  <circle cx="46" cy="20" r="5" fill="#C49460"/>
+  <!-- Face -->
+  <circle cx="32" cy="34" r="16" fill="#E8C9A0"/>
+  <!-- Muzzle -->
+  <ellipse cx="32" cy="38" rx="8" ry="6" fill="#F5DFC0"/>
+  <!-- Nose -->
+  <ellipse cx="32" cy="36" rx="3" ry="2" fill="#6B4226"/>
+  <!-- Eyes - star eyes! -->
+  <path d="M26 31 L24.5 29 L26 27 L27.5 29 Z" fill="#E8961F"/>
+  <path d="M23.5 31 L26 29.5 L28.5 31 L26 32.5 Z" fill="#E8961F"/>
+  <path d="M38 31 L36.5 29 L38 27 L39.5 29 Z" fill="#E8961F"/>
+  <path d="M35.5 31 L38 29.5 L40.5 31 L38 32.5 Z" fill="#E8961F"/>
+  <!-- Big smile -->
+  <path d="M27 40 Q32 45 37 40" stroke="#6B4226" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Arms up! -->
+  <ellipse cx="14" cy="28" rx="4" ry="3" fill="#D4A574" transform="rotate(-30 14 28)"/>
+  <ellipse cx="50" cy="28" rx="4" ry="3" fill="#D4A574" transform="rotate(30 50 28)"/>
+  <!-- Sparkles -->
+  <path d="M10 15 L12 12 L14 15 L12 18 Z" fill="#E8961F"/>
+  <path d="M50 10 L52 7 L54 10 L52 13 Z" fill="#2BA69E"/>
+  <path d="M8 32 L10 30 L12 32 L10 34 Z" fill="#E84545" opacity="0.7"/>
+  <path d="M52 24 L54 22 L56 24 L54 26 Z" fill="#F2A93B"/>
+  <!-- Celemek -->
+  <path d="M24 46 L32 50 L40 46" stroke="#E8961F" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

@@ -26,50 +26,8 @@ class MainLayout extends StatelessWidget {
       backgroundColor: AppColors.bgLight,
       body: Stack(
         children: [
-          // Colorful blobs for Glassmorphism background refraction
-          Positioned(
-            top: -100,
-            right: -50,
-            child: Container(
-              width: 350,
-              height: 350,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 50,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.secondary.withValues(alpha: 0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.3,
-            left: MediaQuery.of(context).size.width * 0.4,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accent.withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-          // Blur the blobs to create a smooth mesh gradient effect
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
-              child: const SizedBox(),
-            ),
-          ),
+          // Background is solid light color (from Scaffold backgroundColor)
+          // Main content on top
           // Main content on top
           navigationShell,
         ],
@@ -98,47 +56,32 @@ class _GlassBottomNav extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       decoration: BoxDecoration(
+        color: AppColors.surfaceLightElevated,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.glassShadow(0.08),
-            blurRadius: 24,
-            spreadRadius: 0,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: AppColors.glassShadow(0.04),
-            blurRadius: 40,
-            offset: const Offset(0, 16),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
           ),
         ],
+        border: Border.all(
+          color: AppColors.textMuted.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            height: 72,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: AppColors.glassWhite(0.4),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: AppColors.glassBorder(0.5),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildNavItem(0, 'assets/icons/ite_dashboard.svg', 'Beranda'),
-                _buildNavItem(1, 'assets/icons/ite_market.svg', 'Pasar'),
-                _buildCenterItem(2, 'assets/icons/ite_idea.svg'),
-                _buildNavItem(3, 'assets/icons/ite_chat.svg', 'AI Chat'),
-                _buildNavItem(4, 'assets/icons/ite_camera.svg', 'Produk'),
-              ],
-            ),
-          ),
+      child: Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildNavItem(0, 'assets/icons/ite_dashboard.svg', 'Beranda'),
+            _buildNavItem(1, 'assets/icons/ite_market.svg', 'Pasar'),
+            _buildCenterItem(2, 'assets/icons/ite_idea.svg'),
+            _buildNavItem(3, 'assets/icons/ite_chat.svg', 'AI Chat'),
+            _buildNavItem(4, 'assets/icons/ite_camera.svg', 'Produk'),
+          ],
         ),
       ),
     );

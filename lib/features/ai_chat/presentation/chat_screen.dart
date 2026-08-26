@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/ite_avatar.dart';
 import '../data/chat_repository.dart';
 import '../domain/chat_model.dart';
 
@@ -246,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           maxLines: 4,
                           minLines: 1,
                           decoration: InputDecoration(
-                            hintText: 'Tanya soal ide bisnismu...',
+                            hintText: 'Curhat bisnis sama Ite... 🐻',
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
@@ -418,7 +419,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Halo Kak! Aku Ite 🐻, beruang konsultan bisnismu! Aku udah baca-baca riwayat cek ide bisnismu, lho.',
+              'Halo Kak! Aku Ite 🐻, teman bisnismu yang paling suka data! Aku udah baca-baca riwayat cek ide bisnismu, lho.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -427,7 +428,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Ada yang bikin bingung soal modal, cara promosi, atau peluang pasar? Sini cerita, biar Ite bantu carikan celahnya!',
+              'Ada yang bikin bingung soal modal, cara promosi, atau peluang pasar? Sini cerita aja, Ite bantuin carikan celahnya! 💪',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -439,9 +440,9 @@ class _ChatScreenState extends State<ChatScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _suggestionChip('Gimana strategi promosi yang pas?'),
-                _suggestionChip('Bantu bedain usahaku dari pesaing dong!'),
-                _suggestionChip('Berapa ya modal awal buat ideku?'),
+                _suggestionChip('📣 Gimana strategi promosi yang pas?'),
+                _suggestionChip('🎯 Bantu bedain usahaku dari pesaing dong!'),
+                _suggestionChip('💰 Berapa ya modal awal buat ideku?'),
               ],
             ),
           ],
