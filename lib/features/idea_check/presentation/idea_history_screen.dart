@@ -9,6 +9,8 @@ import '../../../core/widgets/mascot_reaction.dart';
 import '../../../core/widgets/ite_avatar.dart';
 import '../data/idea_check_repository.dart';
 import '../domain/idea_check_model.dart';
+import '../../market_gap/data/market_gap_repository.dart';
+import '../../market_gap/domain/market_gap_model.dart';
 
 class IdeaHistoryScreen extends StatefulWidget {
   const IdeaHistoryScreen({super.key});
@@ -17,8 +19,9 @@ class IdeaHistoryScreen extends StatefulWidget {
 }
 
 class _IdeaHistoryScreenState extends State<IdeaHistoryScreen> {
-  final _repo = IdeaCheckRepository();
-  List<IdeaCheck> _items = [];
+  final _ideaRepo = IdeaCheckRepository();
+  final _gapRepo = MarketGapRepository();
+  List<dynamic> _items = [];
   bool _isLoading = true;
 
   @override
@@ -29,10 +32,15 @@ class _IdeaHistoryScreenState extends State<IdeaHistoryScreen> {
 
   Future<void> _load() async {
     try {
-      final items = await _repo.getHistory();
+      final ideaItems = await _ideaRepo.getHistory();
+      final gapItems = await _gapRepo.getHistory();
+      
+      final List<dynamic> combined = [...ideaItems, ...gapItems];
+      combined.sort((a, b) => (b.createdAt as DateTime).compareTo(a.createdAt as DateTime));
+
       if (mounted) {
         setState(() {
-          _items = items;
+          _items = combined;
           _isLoading = false;
         });
       }
@@ -72,87 +80,111 @@ class _IdeaHistoryScreenState extends State<IdeaHistoryScreen> {
                   itemCount: _items.length,
                   itemBuilder: (context, i) {
                     final item = _items[i];
-                    return GlassCard(
-                      onTap: () =>
-                          context.push('/idea-check/result/${item.id}'),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(14),
+                    final isIdea = item is IdeaCheck;
+                    
+                    final title = isIdea 
+                        ? (item.productCategory ?? item.inputText ?? 'Ide Bisnis')
+                        : 'Pemindaian Celah Pasar';
+                        
+                    final icon = isIdea ? Icons.lightbulb_outline : Icons.explore_outlined;
+                    final route = isIdea 
+                        ? '/idea-check/result/${item.id}'
+                        : '/market-gap/result/${item.id}';
+                        
+                    final badgeText = isIdea 
+                        ? item.opportunityScore 
+                        : (item as MarketGapScan).gapCategories.isNotEmpty 
+                            ? '${item.gapCategories.length} Peluang' 
+                            : 'Padat';
+                            
+                    final badgeColor = isIdea && item.opportunityScore != null
+                        ? _scoreColor(item.opportunityScore!)
+                        : (!isIdea && (item as MarketGapScan).gapCategories.isNotEmpty)
+                            ? AppColors.scoreHigh
+                            : AppColors.textMuted;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: GlassCard(
+                        onTap: () => context.push(route),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: isIdea ? AppColors.primaryGradient : AppColors.accentGradient,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(icon, color: Colors.white, size: 22),
                             ),
-                            child: const Icon(Icons.lightbulb_outline,
-                                color: Colors.white, size: 22),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.productCategory ??
-                                      item.inputText ??
-                                      'Ide Bisnis',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    if (item.locationName != null) ...[
-                                      Icon(Icons.location_on_outlined,
-                                          size: 12,
-                                          color: AppColors.textMuted),
-                                      const SizedBox(width: 4),
-                                      Text(item.locationName!,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      if (item.locationName != null) ...[
+                                        Icon(Icons.location_on_outlined,
+                                            size: 12,
+                                            color: AppColors.textMuted),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(item.locationName!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: AppColors.textMuted,
+                                                  fontSize: 11)),
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
+                                      Text(
+                                          DateFormat('dd MMM')
+                                              .format(item.createdAt),
                                           style: TextStyle(
                                               color: AppColors.textMuted,
                                               fontSize: 11)),
-                                      const SizedBox(width: 12),
                                     ],
-                                    Text(
-                                        DateFormat('dd MMM yyyy')
-                                            .format(item.createdAt),
-                                        style: TextStyle(
-                                            color: AppColors.textMuted,
-                                            fontSize: 11)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (item.opportunityScore != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: _scoreColor(item.opportunityScore!)
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                item.opportunityScore!,
-                                style: TextStyle(
-                                  color:
-                                      _scoreColor(item.opportunityScore!),
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                        ],
-                      ),
-                    )
-                        .animate()
-                        .fadeIn(
-                            delay: Duration(milliseconds: i * 80),
-                            duration: 400.ms);
+                            if (badgeText != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: badgeColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  badgeText,
+                                  style: TextStyle(
+                                    color: badgeColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      )
+                          .animate()
+                          .fadeIn(
+                              delay: Duration(milliseconds: i * 80),
+                              duration: 400.ms),
+                    );
                   },
                 ),
     );

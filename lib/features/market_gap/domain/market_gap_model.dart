@@ -7,6 +7,9 @@ class MarketGapScan {
   final String? locationName;
   final double radiusKm;
 
+  // Budget input
+  final int? userBudget;
+
   // Results
   final List<GapCategory> gapCategories;
   final Map<String, dynamic> areaProfile;
@@ -21,6 +24,7 @@ class MarketGapScan {
     required this.longitude,
     this.locationName,
     this.radiusKm = 2.0,
+    this.userBudget,
     this.gapCategories = const [],
     this.areaProfile = const {},
     required this.createdAt,
@@ -35,6 +39,7 @@ class MarketGapScan {
       longitude: (json['longitude'] as num).toDouble(),
       locationName: json['location_name'] as String?,
       radiusKm: (json['radius_km'] as num?)?.toDouble() ?? 2.0,
+      userBudget: json['user_budget'] as int?,
       gapCategories: (json['gap_categories'] as List<dynamic>?)
               ?.map((e) => GapCategory.fromJson(Map<String, dynamic>.from(e as Map)))
               .toList() ??
@@ -54,6 +59,12 @@ class GapCategory {
   final String reason;
   final String? estimatedCapital;
 
+  // Structured capital data
+  final int estimatedCapitalMin;
+  final int estimatedCapitalMax;
+  final String capitalSource; // 'manual' or 'ai_estimate'
+  final String capitalMatchLabel; // 'sesuai', 'sedikit_kurang', 'jauh_lebih_besar', 'no_budget'
+
   GapCategory({
     required this.category,
     required this.competitorCount,
@@ -61,6 +72,10 @@ class GapCategory {
     required this.score,
     required this.reason,
     this.estimatedCapital,
+    this.estimatedCapitalMin = 0,
+    this.estimatedCapitalMax = 0,
+    this.capitalSource = 'ai_estimate',
+    this.capitalMatchLabel = 'no_budget',
   });
 
   factory GapCategory.fromJson(Map<String, dynamic> json) {
@@ -71,6 +86,10 @@ class GapCategory {
       score: (json['score'] as num).toDouble(),
       reason: json['reason'] as String,
       estimatedCapital: json['estimated_capital'] as String?,
+      estimatedCapitalMin: (json['estimated_capital_min'] as num?)?.toInt() ?? 0,
+      estimatedCapitalMax: (json['estimated_capital_max'] as num?)?.toInt() ?? 0,
+      capitalSource: json['capital_source'] as String? ?? 'ai_estimate',
+      capitalMatchLabel: json['capital_match_label'] as String? ?? 'no_budget',
     );
   }
 }

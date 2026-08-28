@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Bear face - Happy (strong competitor, high rating) -->
+  <!-- Ears -->
+  <circle cx="12" cy="10" r="8" fill="#C68642"/>
+  <circle cx="12" cy="10" r="5" fill="#DEAA76"/>
+  <circle cx="36" cy="10" r="8" fill="#C68642"/>
+  <circle cx="36" cy="10" r="5" fill="#DEAA76"/>
+  <!-- Head -->
+  <circle cx="24" cy="24" r="16" fill="#C68642"/>
+  <!-- Inner face -->
+  <ellipse cx="24" cy="26" rx="11" ry="10" fill="#DEAA76"/>
+  <!-- Eyes - happy squint -->
+  <path d="M16 20 Q18 18 20 20" stroke="#3D2B1F" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M28 20 Q30 18 32 20" stroke="#3D2B1F" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <!-- Sparkle eyes -->
+  <circle cx="18" cy="19" r="0.8" fill="#FFD700"/>
+  <circle cx="30" cy="19" r="0.8" fill="#FFD700"/>
+  <!-- Nose -->
+  <ellipse cx="24" cy="26" rx="3.5" ry="2.5" fill="#3D2B1F"/>
+  <ellipse cx="23.5" cy="25.2" rx="1" ry="0.6" fill="#7B5B3A" opacity="0.5"/>
+  <!-- Big smile -->
+  <path d="M18 30 Q24 36 30 30" stroke="#3D2B1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- Cheek blush -->
+  <circle cx="14" cy="28" r="3" fill="#FF9999" opacity="0.4"/>
+  <circle cx="34" cy="28" r="3" fill="#FF9999" opacity="0.4"/>
+</svg>

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/mascot_reaction.dart';
 import '../../../core/widgets/ite_avatar.dart';
+import '../../../core/widgets/competitor_map.dart';
 import '../data/market_gap_repository.dart';
 import '../domain/market_gap_model.dart';
 
@@ -20,6 +22,7 @@ class _GapResultScreenState extends State<GapResultScreen> {
   final _repo = MarketGapRepository();
   MarketGapScan? _result;
   bool _isLoading = true;
+  final _rupiahFormat = NumberFormat.decimalPattern('id');
 
   @override
   void initState() {
@@ -39,6 +42,10 @@ class _GapResultScreenState extends State<GapResultScreen> {
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  String _formatRupiah(int value) {
+    return 'Rp ${_rupiahFormat.format(value)}';
   }
 
   @override
@@ -111,6 +118,25 @@ class _GapResultScreenState extends State<GapResultScreen> {
                                         color: AppColors.textMuted,
                                         fontSize: 12),
                                   ),
+                                  if (_result!.userBudget != null && _result!.userBudget! > 0)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.account_balance_wallet_outlined,
+                                              size: 12, color: AppColors.secondary),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Modal: ${_formatRupiah(_result!.userBudget!)}',
+                                            style: TextStyle(
+                                              color: AppColors.secondary,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -124,12 +150,13 @@ class _GapResultScreenState extends State<GapResultScreen> {
                       MascotReaction(
                         pose: _result!.gapCategories.isNotEmpty ? ItePose.celebrate : ItePose.support,
                         message: _result!.gapCategories.isNotEmpty
-                            ? 'Wah, Ite nemu ${_result!.gapCategories.length} kategori yang masih terbuka di sini! Cek satu-satu ya 🎉'
-                            : 'Hmm, area ini udah cukup ramai. Coba perluas radius atau pindah lokasi ya! 💪',
+                            ? 'Wah, Ite nemu ${_result!.gapCategories.length} kategori potensi di sini${_result!.userBudget != null && _result!.userBudget! > 0 ? " yang sudah disesuaikan dengan modalmu!" : "!"} Cek satu-satu ya 🎉'
+                            : 'Hmm, area ini udah sangat padat kompetitor${_result!.userBudget != null && _result!.userBudget! > 0 ? " dan belum ada yang pas dengan budgetmu" : ""}. Coba perluas radius atau geser lokasi sedikit ya! 💪',
                         highlighted: _result!.gapCategories.isNotEmpty,
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
+
                       Text(
                         'Kategori yang Masih Terbuka',
                         style: AppTheme.displayFont(
@@ -139,7 +166,9 @@ class _GapResultScreenState extends State<GapResultScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Diurutkan berdasarkan potensi peluang',
+                        _result!.userBudget != null && _result!.userBudget! > 0
+                            ? 'Diurutkan berdasarkan kecocokan modal & peluang'
+                            : 'Diurutkan berdasarkan potensi peluang',
                         style: TextStyle(
                             color: AppColors.textMuted, fontSize: 12),
                       ),
@@ -161,6 +190,8 @@ class _GapResultScreenState extends State<GapResultScreen> {
                 ),
     );
   }
+
+
 
   Widget _gapTile(int index, GapCategory gap) {
     return Container(
@@ -215,6 +246,13 @@ class _GapResultScreenState extends State<GapResultScreen> {
                 ),
               ],
             ),
+
+            // ── Capital Match Badge (NEW — Jalur B only) ──
+            if (gap.capitalMatchLabel != 'no_budget') ...[
+              const SizedBox(height: 10),
+              _capitalMatchBadge(gap),
+            ],
+
             const SizedBox(height: 12),
             Text(
               gap.reason,
@@ -232,8 +270,17 @@ class _GapResultScreenState extends State<GapResultScreen> {
                 _infoChip(
                     '${gap.competitorCount} kompetitor', Icons.store_outlined),
                 _infoChip(gap.areaDensity, Icons.density_small_rounded),
-                if (gap.estimatedCapital != null)
+                if (gap.estimatedCapitalMin > 0 && gap.estimatedCapitalMax > 0)
+                  _infoChip(
+                    '${_formatRupiah(gap.estimatedCapitalMin)} – ${_formatRupiah(gap.estimatedCapitalMax)}',
+                    Icons.payments_outlined,
+                  )
+                else if (gap.estimatedCapital != null)
                   _infoChip(gap.estimatedCapital!, Icons.payments_outlined),
+                if (gap.capitalSource == 'manual')
+                  _infoChip('Data kurasi', Icons.verified_outlined)
+                else if (gap.capitalSource == 'ai_estimate')
+                  _infoChip('Estimasi AI', Icons.auto_awesome_outlined),
               ],
             ),
           ],
@@ -244,6 +291,63 @@ class _GapResultScreenState extends State<GapResultScreen> {
         .fadeIn(
             delay: Duration(milliseconds: 100 + index * 80), duration: 400.ms)
         .slideX(begin: 0.1, end: 0);
+  }
+
+  /// Badge indicating how well user's budget matches this category.
+  Widget _capitalMatchBadge(GapCategory gap) {
+    Color bgColor;
+    Color textColor;
+    IconData icon;
+    String label;
+
+    switch (gap.capitalMatchLabel) {
+      case 'sesuai':
+        bgColor = AppColors.scoreHigh.withValues(alpha: 0.12);
+        textColor = AppColors.scoreHigh;
+        icon = Icons.check_circle_outline_rounded;
+        label = 'Sesuai modal kamu ✅';
+        break;
+      case 'sedikit_kurang':
+        bgColor = AppColors.scoreMedium.withValues(alpha: 0.12);
+        textColor = AppColors.scoreMedium;
+        icon = Icons.info_outline_rounded;
+        label = 'Modal sedikit kurang, tapi bisa dipertimbangkan 🤔';
+        break;
+      case 'jauh_lebih_besar':
+        bgColor = AppColors.scoreLow.withValues(alpha: 0.08);
+        textColor = AppColors.scoreLow;
+        icon = Icons.warning_amber_rounded;
+        label = 'Butuh modal jauh lebih besar 💸';
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: textColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: textColor),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _infoChip(String text, IconData icon) {
@@ -258,8 +362,10 @@ class _GapResultScreenState extends State<GapResultScreen> {
         children: [
           Icon(icon, size: 12, color: AppColors.textMuted),
           const SizedBox(width: 4),
-          Text(text,
-              style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+          Flexible(
+            child: Text(text,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+          ),
         ],
       ),
     );

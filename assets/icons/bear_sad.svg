@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Bear face - Sad/Lesu (low-rated competitor = opportunity gap) -->
+  <!-- Ears -->
+  <circle cx="12" cy="10" r="8" fill="#C68642"/>
+  <circle cx="12" cy="10" r="5" fill="#DEAA76"/>
+  <circle cx="36" cy="10" r="8" fill="#C68642"/>
+  <circle cx="36" cy="10" r="5" fill="#DEAA76"/>
+  <!-- Head -->
+  <circle cx="24" cy="24" r="16" fill="#C68642"/>
+  <!-- Inner face -->
+  <ellipse cx="24" cy="26" rx="11" ry="10" fill="#DEAA76"/>
+  <!-- Eyes - droopy/sad -->
+  <ellipse cx="18" cy="20" rx="2.2" ry="2.5" fill="#3D2B1F"/>
+  <ellipse cx="30" cy="20" rx="2.2" ry="2.5" fill="#3D2B1F"/>
+  <!-- Sad eyebrows -->
+  <path d="M14 16 Q18 14 21 16" stroke="#3D2B1F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M27 16 Q30 14 34 16" stroke="#3D2B1F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Frown -->
+  <path d="M19 33 Q24 29 29 33" stroke="#3D2B1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- Nose -->
+  <ellipse cx="24" cy="26" rx="3.5" ry="2.5" fill="#3D2B1F"/>
+  <ellipse cx="23.5" cy="25.2" rx="1" ry="0.6" fill="#7B5B3A" opacity="0.5"/>
+  <!-- Sweat drop -->
+  <ellipse cx="36" cy="17" rx="1.5" ry="2.2" fill="#87CEEB" opacity="0.6"/>
+</svg>

@@ -14,6 +14,7 @@ import '../../features/product_photo/presentation/product_studio_screen.dart';
 import '../../features/product_photo/presentation/enhance_photo_screen.dart';
 import '../../features/product_photo/presentation/generate_photo_screen.dart';
 import '../../features/product_photo/presentation/history_screen.dart';
+import '../../features/splash/presentation/splash_screen.dart';
 import '../widgets/main_layout.dart';
 
 class AppRouter {
@@ -21,12 +22,15 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/login',
+    initialLocation: '/splash',
     redirect: (context, state) {
       final session = Supabase.instance.client.auth.currentSession;
       final isLoggedIn = session != null;
       final isAuthRoute = state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
+      final isSplash = state.matchedLocation == '/splash';
+
+      if (isSplash) return null; // Let splash screen handle navigation
 
       if (!isLoggedIn && !isAuthRoute) {
         return '/login';
@@ -37,6 +41,11 @@ class AppRouter {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',

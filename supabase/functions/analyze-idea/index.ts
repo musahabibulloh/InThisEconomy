@@ -28,7 +28,7 @@ async function searchNearbyCompetitors(
   category: string, lat: number, lng: number, radiusMeters: number
 ): Promise<PlaceResult[]> {
   // Use a zoom level roughly corresponding to the radius. 14z is good for ~2km
-  const url = `https://serpapi.com/search.json?engine=google_local&q=${encodeURIComponent(category)}&ll=@${lat},${lng},14z&hl=id&gl=id&api_key=${SERPAPI_KEY}`
+  const url = `https://serpapi.com/search.json?engine=google_maps&q=${encodeURIComponent(category)}&ll=@${lat},${lng},14z&hl=id&gl=id&api_key=${SERPAPI_KEY}`
 
   try {
     const resp = await fetch(url)

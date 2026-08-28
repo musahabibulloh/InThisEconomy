@@ -8,7 +8,7 @@ class ValidasiIdeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'ValidasiIde - Validasi Ide Bisnis UMKM',
+      title: 'Market Mind',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: AppRouter.router,

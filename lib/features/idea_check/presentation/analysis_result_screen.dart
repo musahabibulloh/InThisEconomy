@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import '../../../core/config/app_colors.dart';
 import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/market_meter.dart';
 import '../../../core/widgets/mascot_reaction.dart';
 import '../../../core/widgets/ite_avatar.dart';
+import '../../../core/widgets/competitor_map.dart';
+import '../../../core/widgets/bear_marker.dart';
 import '../data/idea_check_repository.dart';
 import '../domain/idea_check_model.dart';
 
@@ -212,6 +212,19 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
             ),
           ).animate().fadeIn(delay: 200.ms, duration: 500.ms),
 
+          // ── Competitors Map & List ──
+          if (r.competitors.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            CompetitorMap(
+              latitude: r.latitude,
+              longitude: r.longitude,
+              radiusKm: r.radiusKm,
+              competitors: r.competitors,
+              height: 260,
+            ).animate().fadeIn(delay: 250.ms, duration: 500.ms),
+            const SizedBox(height: 16),
+          ],
+
           const SizedBox(height: 16),
 
           // ── Recommendation (Ite's advice — most actionable!) ──
@@ -240,12 +253,7 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
             color: AppColors.scoreMedium,
           ).animate().fadeIn(delay: 540.ms, duration: 400.ms),
 
-          // ── Competitors Map & List ──
           if (r.competitors.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            if (r.latitude != null && r.longitude != null)
-              _buildCompetitorsMap(r).animate().fadeIn(delay: 600.ms, duration: 500.ms),
-            
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -345,77 +353,6 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
     );
   }
 
-  Widget _buildCompetitorsMap(IdeaCheck r) {
-    final center = LatLng(r.latitude!, r.longitude!);
-    final radiusKm = r.radiusKm ?? 2.0;
-    
-    // Approximate zoom level
-    double zoom = 14.0;
-    if (radiusKm <= 1.0) zoom = 15.0;
-    if (radiusKm >= 4.0) zoom = 13.0;
-
-    return Container(
-      height: 220,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLightElevated,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.textMuted.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: center,
-            initialZoom: zoom,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-            ),
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.umkm.validasi_ide',
-            ),
-            MarkerLayer(
-              markers: [
-                // User Location
-                Marker(
-                  point: center,
-                  width: 40,
-                  height: 40,
-                  child: const Icon(Icons.location_on, color: AppColors.primary, size: 40),
-                ),
-                // Competitors (Bear Face)
-                ...r.competitors
-                    .where((c) => c['latitude'] != null && c['longitude'] != null)
-                    .map((c) => Marker(
-                          point: LatLng((c['latitude'] as num).toDouble(), (c['longitude'] as num).toDouble()),
-                          width: 32,
-                          height: 32,
-                          child: Tooltip(
-                            message: c['name'] ?? 'Kompetitor',
-                            child: const IteAvatar(
-                              pose: ItePose.greet,
-                              size: 32,
-                              showEntrance: false,
-                            ),
-                          ),
-                        )),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildSection(
     String title,
     IconData icon,
@@ -483,24 +420,8 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: ratingColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  rating > 0 ? rating.toStringAsFixed(1) : '—',
-                  style: AppTheme.displayFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: ratingColor,
-                  ),
-                ),
-              ),
-            ),
+            // Bear face avatar instead of plain rating box
+            BearMarker.fromRating(rating, size: 40),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -521,6 +442,28 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: ratingColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.star_rounded, size: 12, color: ratingColor),
+                  const SizedBox(width: 2),
+                  Text(
+                    rating > 0 ? rating.toStringAsFixed(1) : '—',
+                    style: AppTheme.displayFont(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: ratingColor,
+                    ),
+                  ),
                 ],
               ),
             ),

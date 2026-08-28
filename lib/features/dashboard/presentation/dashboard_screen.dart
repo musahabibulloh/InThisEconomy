@@ -7,6 +7,10 @@ import '../../../core/config/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/ite_avatar.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../idea_check/data/idea_check_repository.dart';
+import '../../market_gap/data/market_gap_repository.dart';
+import '../../ai_chat/data/chat_repository.dart';
+import '../../product_photo/data/photo_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +22,12 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final _authRepo = AuthRepository();
   String _userName = '';
+  
+  // Stats
+  int _ideaChecksCount = 0;
+  int _consultationCount = 0;
+  int _photoCount = 0;
+  bool _isLoadingStats = true;
 
   // Rotating playful greetings
   static const _greetings = [
@@ -32,8 +42,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _loadAllData();
     _greeting = _greetings[DateTime.now().minute % _greetings.length];
+  }
+
+  Future<void> _loadAllData() async {
+    await Future.wait([
+      _loadProfile(),
+      _loadStats(),
+    ]);
+  }
+
+  Future<void> _loadStats() async {
+    try {
+      final ideaCount = (await IdeaCheckRepository().getHistory()).length;
+      final gapCount = (await MarketGapRepository().getHistory()).length;
+      final chatCount = (await ChatRepository().getSessions()).length;
+      final photoCount = (await PhotoRepository().getPhotos()).length;
+
+      if (mounted) {
+        setState(() {
+          _ideaChecksCount = ideaCount + gapCount;
+          _consultationCount = chatCount;
+          _photoCount = photoCount;
+          _isLoadingStats = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingStats = false);
+      }
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -53,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _loadProfile,
+          onRefresh: _loadAllData,
           color: AppColors.primary,
           backgroundColor: AppColors.bgLightSecondary,
           child: SingleChildScrollView(
@@ -146,51 +185,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               const SizedBox(height: 12),
 
-              Row(
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.9,
                 children: [
-                  Expanded(
-                    child: _ModuleCard(
-                      title: 'Cek Ide Bisnis',
-                      subtitle: 'Validasi ide dengan data pasar',
-                      pose: ItePose.idea,
-                      onTap: () => context.push('/idea-check'),
-                    ),
+                  _ModuleCard(
+                    title: 'Cek Ide',
+                    imagePath: 'assets/icons/cek ide.png',
+                    bgColor: AppColors.primary,
+                    onTap: () => context.push('/idea-check'),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ModuleCard(
-                      title: 'Cari Celah Pasar',
-                      subtitle: 'Temukan peluang bisnis baru',
-                      pose: ItePose.market,
-                      onTap: () => context.push('/market-gap'),
-                    ),
+                  _ModuleCard(
+                    title: 'Celah Pasar',
+                    imagePath: 'assets/icons/celah pasar.png',
+                    bgColor: AppColors.scoreMedium,
+                    onTap: () => context.push('/market-gap'),
+                  ),
+                  _ModuleCard(
+                    title: 'Konsultasi',
+                    imagePath: 'assets/icons/konsultasi.png',
+                    bgColor: AppColors.secondary,
+                    onTap: () => context.push('/ai-chat'),
+                  ),
+                  _ModuleCard(
+                    title: 'Studio Foto',
+                    imagePath: 'assets/icons/studio foto.png',
+                    bgColor: AppColors.scoreHigh,
+                    onTap: () => context.push('/product-photo'),
                   ),
                 ],
               ).animate().fadeIn(delay: 300.ms, duration: 600.ms).slideY(begin: 0.15, end: 0),
-
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: _ModuleCard(
-                      title: 'Konsultasi AI',
-                      subtitle: 'Curhat bisnis sama Ite',
-                      pose: ItePose.chat,
-                      onTap: () => context.push('/ai-chat'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ModuleCard(
-                      title: 'Studio Foto',
-                      subtitle: 'Percantik foto produkmu',
-                      pose: ItePose.camera,
-                      onTap: () => context.push('/product-photo'),
-                    ),
-                  ),
-                ],
-              ).animate().fadeIn(delay: 400.ms, duration: 600.ms).slideY(begin: 0.15, end: 0),
 
               const SizedBox(height: 16),
 
@@ -291,20 +319,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(
-                  'Ide Dicek', '—', Icons.lightbulb_outline),
+                  'Ide Dicek', 
+                  _isLoadingStats ? '-' : _ideaChecksCount.toString(), 
+                  Icons.lightbulb_outline),
               Container(
                 width: 1,
                 height: 40,
                 color: Colors.white.withValues(alpha: 0.3),
               ),
               _buildStatItem(
-                  'Konsultasi', '—', Icons.chat_bubble_outline),
+                  'Konsultasi', 
+                  _isLoadingStats ? '-' : _consultationCount.toString(), 
+                  Icons.chat_bubble_outline),
               Container(
                 width: 1,
                 height: 40,
                 color: Colors.white.withValues(alpha: 0.3),
               ),
-              _buildStatItem('Foto', '—', Icons.camera_alt_outlined),
+              _buildStatItem(
+                  'Foto', 
+                  _isLoadingStats ? '-' : _photoCount.toString(), 
+                  Icons.camera_alt_outlined),
             ],
           ),
         ],
@@ -341,46 +376,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
 /// Module card with Ite mascot icon for each feature.
 class _ModuleCard extends StatelessWidget {
   final String title;
-  final String subtitle;
-  final ItePose pose;
+  final ItePose? pose;
+  final String? imagePath;
   final VoidCallback onTap;
+  final Color bgColor;
 
   const _ModuleCard({
     required this.title,
-    required this.subtitle,
-    required this.pose,
+    this.pose,
+    this.imagePath,
     required this.onTap,
+    required this.bgColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
+    return GestureDetector(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IteAvatar(pose: pose, size: 36, showEntrance: false),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
             ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: bgColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: imagePath != null
+                        ? Image.asset(
+                            imagePath!,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                          )
+                        : Center(
+                            child: IteAvatar(
+                              pose: pose ?? ItePose.idea,
+                              size: 70,
+                              showEntrance: false,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 11,
-              height: 1.4,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }

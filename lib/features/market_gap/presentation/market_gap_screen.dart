@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/config/app_colors.dart';
-import '../../../core/widgets/glass_card.dart';
+
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/mascot_reaction.dart';
 import '../../../core/widgets/ite_avatar.dart';
+import '../../../core/widgets/rupiah_input.dart';
 import '../data/market_gap_repository.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -19,16 +21,19 @@ class MarketGapScreen extends StatefulWidget {
 class _MarketGapScreenState extends State<MarketGapScreen> {
   final _formKey = GlobalKey<FormState>();
   final _locationController = TextEditingController();
+  final _budgetController = TextEditingController();
   final _repo = MarketGapRepository();
   bool _isLoading = false;
   double _radiusKm = 2.0;
   double _latitude = -6.2088;
   double _longitude = 106.8456;
   bool _isLocating = false;
+  int? _selectedPresetIndex;
 
   @override
   void dispose() {
     _locationController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
@@ -36,11 +41,13 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
+      final budget = RupiahInputFormatter.parse(_budgetController.text);
       final result = await _repo.scanMarketGaps(
         latitude: _latitude,
         longitude: _longitude,
         locationName: _locationController.text.trim(),
         radiusKm: _radiusKm,
+        userBudget: budget,
       );
       if (mounted) context.push('/market-gap/result/${result.id}');
     } catch (e) {
@@ -62,7 +69,16 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
     await Future.delayed(const Duration(milliseconds: 800));
     setState(() {
       _locationController.clear();
+      _budgetController.clear();
       _radiusKm = 2.0;
+      _selectedPresetIndex = null;
+    });
+  }
+
+  void _selectPreset(int index, BudgetPreset preset) {
+    setState(() {
+      _selectedPresetIndex = index;
+      _budgetController.text = preset.displayText;
     });
   }
 
@@ -164,6 +180,107 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
                 ).animate().fadeIn(delay: 150.ms, duration: 400.ms),
 
                 const SizedBox(height: 24),
+
+                // ── BUDGET INPUT (NEW) ──
+                Row(
+                  children: [
+                    Icon(Icons.account_balance_wallet_outlined,
+                        color: AppColors.secondaryLight, size: 18),
+                    const SizedBox(width: 8),
+                    Text('Modal yang Kamu Punya',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 15)),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.textMuted.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text('opsional',
+                          style: TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 10,
+                              fontStyle: FontStyle.italic)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Ite bisa filter rekomendasi sesuai budget-mu 💰',
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                ),
+                const SizedBox(height: 10),
+
+                // Budget text field with Rupiah formatter
+                TextFormField(
+                  controller: _budgetController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    RupiahInputFormatter(),
+                  ],
+                  decoration: InputDecoration(
+                    hintText: 'Contoh: Rp 5.000.000',
+                    prefixIcon: const Icon(Icons.payments_outlined,
+                        color: AppColors.textMuted),
+                  ),
+                  onChanged: (_) {
+                    // Clear preset selection when user types manually
+                    if (_selectedPresetIndex != null) {
+                      setState(() => _selectedPresetIndex = null);
+                    }
+                  },
+                ).animate().fadeIn(delay: 180.ms, duration: 400.ms),
+
+                const SizedBox(height: 10),
+
+                // Quick-select preset chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: BudgetPreset.defaults.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final preset = entry.value;
+                    final isSelected = _selectedPresetIndex == index;
+
+                    return GestureDetector(
+                      onTap: () => _selectPreset(index, preset),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.secondary.withValues(alpha: 0.15)
+                              : AppColors.surfaceLightElevated,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.secondary
+                                : AppColors.textMuted.withValues(alpha: 0.15),
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Text(
+                          preset.label,
+                          style: TextStyle(
+                            color: isSelected
+                                ? AppColors.secondary
+                                : AppColors.textSecondary,
+                            fontSize: 12,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ).animate().fadeIn(delay: 220.ms, duration: 400.ms),
+
+                const SizedBox(height: 24),
+
+                // Radius slider
                 Row(
                   children: [
                     Icon(Icons.radar_rounded,
@@ -192,7 +309,7 @@ class _MarketGapScreenState extends State<MarketGapScreen> {
                     divisions: 9,
                     onChanged: (v) => setState(() => _radiusKm = v),
                   ),
-                ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
+                ).animate().fadeIn(delay: 260.ms, duration: 400.ms),
                 const SizedBox(height: 16),
 
                 // Disclaimer as Ite speech

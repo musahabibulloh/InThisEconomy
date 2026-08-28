@@ -10,15 +10,22 @@ class MarketGapRepository {
     required double longitude,
     String? locationName,
     double radiusKm = 2.0,
+    int? userBudget,
   }) async {
+    final body = <String, dynamic>{
+      'latitude': latitude,
+      'longitude': longitude,
+      'location_name': locationName,
+      'radius_km': radiusKm,
+    };
+
+    if (userBudget != null && userBudget > 0) {
+      body['user_budget'] = userBudget;
+    }
+
     final response = await _client.functions.invoke(
       'scan-market-gaps',
-      body: {
-        'latitude': latitude,
-        'longitude': longitude,
-        'location_name': locationName,
-        'radius_km': radiusKm,
-      },
+      body: body,
     );
 
     if (response.status != 200) {
