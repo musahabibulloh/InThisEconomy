@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 /// but now lives on a bright, breathing canvas.
 class AppColors {
   // ── Primary: Kuning Lampu (lantern gold) — solid, pekat ──
-  static const Color primary = Color(0xFFE8961F);
-  static const Color primaryLight = Color(0xFFF2A93B);
-  static const Color primaryDark = Color(0xFFCB7E12);
+  static const Color primary = Color(0xFFF09020);
+  static const Color primaryLight = Color(0xFFF4A84D);
+  static const Color primaryDark = Color(0xFFD97E15);
 
   // ── Secondary: Hijau Daun Pisang (banana leaf teal) ──
   static const Color secondary = Color(0xFF2BA69E);
@@ -20,10 +20,10 @@ class AppColors {
   static const Color accentLight = Color(0xFFFF6B6B);
 
   // ── Background & Surface (Light — cream to white gradient canvas) ──
-  static const Color bgLight = Color(0xFFF7F4EF);        // Warm cream base
-  static const Color bgLightSecondary = Color(0xFFF0ECE5); // Slightly deeper cream
+  static const Color bgLight = Color(0xFFFFF7EB);        // Warm cream base
+  static const Color bgLightSecondary = Color(0xFFFDF1DF); // Slightly deeper cream
   static const Color surfaceLight = Color(0xFFFFFFFF);     // Pure white card fallback
-  static const Color surfaceLightElevated = Color(0xFFFAF8F5); // Warm white
+  static const Color surfaceLightElevated = Color(0xFFFFFFFF); // Pure white
 
   // ── Glass surface tokens ──
   /// Glass fill: highly transparent white

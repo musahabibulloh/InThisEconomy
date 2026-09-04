@@ -382,4 +382,5 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
       }
     }
   }
+
 }

@@ -138,24 +138,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
-                  // Logout button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.glassWhite(0.8),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.glassBorder(),
+                  // Notification bell
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary, size: 28),
+                        onPressed: () {},
                       ),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.logout_rounded,
-                          color: AppColors.textSecondary),
-                      onPressed: () async {
-                        await _authRepo.signOut();
-                        if (context.mounted) context.go('/login');
-                      },
-                      tooltip: 'Keluar',
-                    ),
+                      Positioned(
+                        top: 10,
+                        right: 12,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.accent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               )
@@ -195,25 +197,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _ModuleCard(
                     title: 'Cek Ide',
-                    imagePath: 'assets/icons/cek ide.png',
+                    subtitle: 'Validasi ide kamu',
+                    imagePath: 'assets/Cek Ide.jpg',
                     bgColor: AppColors.primary,
                     onTap: () => context.push('/idea-check'),
                   ),
                   _ModuleCard(
                     title: 'Celah Pasar',
-                    imagePath: 'assets/icons/celah pasar.png',
+                    subtitle: 'Temukan peluang',
+                    imagePath: 'assets/Celah Pasar.jpg',
                     bgColor: AppColors.scoreMedium,
                     onTap: () => context.push('/market-gap'),
                   ),
                   _ModuleCard(
                     title: 'Konsultasi',
-                    imagePath: 'assets/icons/konsultasi.png',
+                    subtitle: 'Diskusi dengan ahli',
+                    imagePath: 'assets/Konsultasi.jpg',
                     bgColor: AppColors.secondary,
                     onTap: () => context.push('/ai-chat'),
                   ),
                   _ModuleCard(
                     title: 'Studio Foto',
-                    imagePath: 'assets/icons/studio foto.png',
+                    subtitle: 'Foto produkmu',
+                    imagePath: 'assets/Studio Foto.jpg',
                     bgColor: AppColors.scoreHigh,
                     onTap: () => context.push('/product-photo'),
                   ),
@@ -376,6 +382,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 /// Module card with Ite mascot icon for each feature.
 class _ModuleCard extends StatelessWidget {
   final String title;
+  final String subtitle;
   final ItePose? pose;
   final String? imagePath;
   final VoidCallback onTap;
@@ -383,6 +390,7 @@ class _ModuleCard extends StatelessWidget {
 
   const _ModuleCard({
     required this.title,
+    required this.subtitle,
     this.pose,
     this.imagePath,
     required this.onTap,
@@ -411,13 +419,14 @@ class _ModuleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
+                flex: 3,
                 child: Container(
                   decoration: BoxDecoration(
                     color: bgColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                     child: imagePath != null
                         ? Image.asset(
                             imagePath!,
@@ -428,7 +437,7 @@ class _ModuleCard extends StatelessWidget {
                         : Center(
                             child: IteAvatar(
                               pose: pose ?? ItePose.idea,
-                              size: 70,
+                              size: 50,
                               showEntrance: false,
                             ),
                           ),
@@ -441,7 +450,16 @@ class _ModuleCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
                 ),
               ),
               const SizedBox(height: 4),
